@@ -1,0 +1,56 @@
+{
+  "id": "ink-minimal",
+  "kind": "app",
+  "name": "极简墨水",
+  "nameEn": "Ink Minimal",
+  "summary": "白底黑字、单一强调、细线分割、大留白与字重对比",
+  "whenToUse": "内容产品、笔记/写作、设计工作室站、克制高级感工具",
+  "palette": {
+    "bg": "#FAFAF9",
+    "bgAlt": "#F0EFED",
+    "surface": "#FFFFFF",
+    "surface2": "#F5F5F4",
+    "ink": "#0C0A09",
+    "ink2": "#44403C",
+    "ink3": "#A8A29E",
+    "primary": "#0C0A09",
+    "primary2": "#1C1917",
+    "onPrimary": "#FAFAF9",
+    "accent": "#2563EB",
+    "accent2": "#0F766E",
+    "ok": "#15803D",
+    "warn": "#B45309",
+    "danger": "#B91C1C",
+    "line": "#E7E5E4",
+    "glass": "rgba(250,250,249,0.92)"
+  },
+  "type": {
+    "fontStack": "'Georgia','Times New Roman','Songti SC','PingFang SC','Noto Serif SC',serif",
+    "weightDisplay": "500",
+    "weightBody": "400",
+    "weightStrong": "600",
+    "fsXs": "12px", "fsSm": "13px", "fsMd": "15px", "fsLg": "18px",
+    "fsXl": "24px", "fs2xl": "32px", "fs3xl": "42px",
+    "tracking": "0.04em"
+  },
+  "shape": {
+    "rSm": "0px", "rMd": "2px", "rLg": "4px", "rXl": "6px", "rFull": "999px",
+    "borderW": "1px",
+    "borderC": "#E7E5E4",
+    "stroke": "#0C0A09"
+  },
+  "elevation": {
+    "card": "none",
+    "btn": "none",
+    "btnPress": "none",
+    "glow": "none",
+    "inset": "none"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.4, 0, 0.2, 1)",
+    "durFast": "120ms", "dur": "220ms", "durSlow": "360ms",
+    "pressScale": "0.99"
+  },
+  "chrome": { "header": "center", "button": "text", "card": "rule", "tab": "underline", "pattern": "none", "grain": false },
+  "extras": {}
+}

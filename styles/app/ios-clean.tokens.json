@@ -1,0 +1,56 @@
+{
+  "id": "ios-clean",
+  "kind": "app",
+  "name": "苹果极简",
+  "nameEn": "iOS Clean",
+  "summary": "iOS HIG：#F2F2F7 分组列表、系统蓝、大标题导航、毛玻璃底栏",
+  "whenToUse": "C 端 App、工具类、系统级观感、需要“原生 iOS 感”的原型",
+  "palette": {
+    "bg": "#F2F2F7",
+    "bgAlt": "#E5E5EA",
+    "surface": "#FFFFFF",
+    "surface2": "#F2F2F7",
+    "ink": "#000000",
+    "ink2": "#3C3C43",
+    "ink3": "#8E8E93",
+    "primary": "#007AFF",
+    "primary2": "#0062CC",
+    "onPrimary": "#FFFFFF",
+    "accent": "#5856D6",
+    "accent2": "#34C759",
+    "ok": "#34C759",
+    "warn": "#FF9500",
+    "danger": "#FF3B30",
+    "line": "rgba(60,60,67,0.12)",
+    "glass": "rgba(249,249,251,0.82)"
+  },
+  "type": {
+    "fontStack": "-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','Helvetica Neue','Microsoft YaHei',system-ui,sans-serif",
+    "weightDisplay": "700",
+    "weightBody": "400",
+    "weightStrong": "600",
+    "fsXs": "12px", "fsSm": "13px", "fsMd": "15px", "fsLg": "17px",
+    "fsXl": "22px", "fs2xl": "28px", "fs3xl": "34px",
+    "tracking": "-0.015em"
+  },
+  "shape": {
+    "rSm": "8px", "rMd": "12px", "rLg": "16px", "rXl": "22px", "rFull": "999px",
+    "borderW": "0.5px",
+    "borderC": "rgba(60,60,67,0.10)",
+    "stroke": "#000000"
+  },
+  "elevation": {
+    "card": "none",
+    "btn": "none",
+    "btnPress": "none",
+    "glow": "none",
+    "inset": "none"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.32, 0.72, 0, 1)",
+    "durFast": "100ms", "dur": "240ms", "durSlow": "400ms",
+    "pressScale": "0.98"
+  },
+  "chrome": { "header": "blur", "button": "fill", "card": "inset-group", "tab": "blur", "pattern": "none", "grain": false },
+  "extras": {}
+}

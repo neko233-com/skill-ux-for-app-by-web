@@ -1,0 +1,56 @@
+{
+  "id": "material",
+  "kind": "app",
+  "name": "谷歌质感",
+  "nameEn": "Material",
+  "summary": "Material 3：tonal 色板、大圆角表面、柔和 elevation、状态胶囊",
+  "whenToUse": "Android 向 App、工具/效率产品、需要现代化系统观感的原型",
+  "palette": {
+    "bg": "#FFFBFE",
+    "bgAlt": "#F3EDF7",
+    "surface": "#FFFFFF",
+    "surface2": "#F3EDF7",
+    "ink": "#1C1B1F",
+    "ink2": "#49454F",
+    "ink3": "#79747E",
+    "primary": "#6750A4",
+    "primary2": "#5B4594",
+    "onPrimary": "#FFFFFF",
+    "accent": "#E8DEF8",
+    "accent2": "#7D5260",
+    "ok": "#386A20",
+    "warn": "#7D5700",
+    "danger": "#BA1A1A",
+    "line": "#E6E0E9",
+    "glass": "rgba(255,255,255,0.9)"
+  },
+  "type": {
+    "fontStack": "'Roboto','Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif",
+    "weightDisplay": "500",
+    "weightBody": "400",
+    "weightStrong": "500",
+    "fsXs": "11px", "fsSm": "12px", "fsMd": "14px", "fsLg": "16px",
+    "fsXl": "20px", "fs2xl": "26px", "fs3xl": "32px",
+    "tracking": "0"
+  },
+  "shape": {
+    "rSm": "8px", "rMd": "12px", "rLg": "16px", "rXl": "28px", "rFull": "999px",
+    "borderW": "1px",
+    "borderC": "#E6E0E9",
+    "stroke": "#1C1B1F"
+  },
+  "elevation": {
+    "card": "0 1px 2px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.06)",
+    "btn": "0 1px 2px rgba(0,0,0,0.12)",
+    "btnPress": "none",
+    "glow": "none",
+    "inset": "none"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.2, 0, 0, 1)",
+    "durFast": "120ms", "dur": "220ms", "durSlow": "360ms",
+    "pressScale": "0.97"
+  },
+  "chrome": { "header": "flat", "button": "fill", "card": "elevated", "tab": "pill", "pattern": "none", "grain": false },
+  "extras": {}
+}

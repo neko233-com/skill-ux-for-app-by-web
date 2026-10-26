@@ -1,0 +1,56 @@
+{
+  "id": "supercell",
+  "kind": "game",
+  "name": "Supercell 欧美卡通",
+  "nameEn": "Supercell Cartoon",
+  "summary": "高饱和蓝金、粗描边、实色底阴影、大写粗体标题、厚重 chunky 按钮",
+  "whenToUse": "欧美卡通手游、SLG、塔防、休闲竞技、Clash 系观感",
+  "palette": {
+    "bg": "#1B2A4A",
+    "bgAlt": "#152240",
+    "surface": "#2E4470",
+    "surface2": "#263A62",
+    "ink": "#F5EFE0",
+    "ink2": "#C8D4EC",
+    "ink3": "#8FA0C4",
+    "primary": "#FFB020",
+    "primary2": "#F08C00",
+    "onPrimary": "#3A2200",
+    "accent": "#3DB4FF",
+    "accent2": "#7B6CFF",
+    "ok": "#5DD39E",
+    "warn": "#FFD36D",
+    "danger": "#FF5C5C",
+    "line": "#3F5890",
+    "glass": "rgba(46,68,112,0.92)"
+  },
+  "type": {
+    "fontStack": "'Arial Rounded MT Bold','PingFang SC','Microsoft YaHei',system-ui,sans-serif",
+    "weightDisplay": "800",
+    "weightBody": "600",
+    "weightStrong": "800",
+    "fsXs": "11px", "fsSm": "12px", "fsMd": "14px", "fsLg": "17px",
+    "fsXl": "20px", "fs2xl": "26px", "fs3xl": "32px",
+    "tracking": "0.04em"
+  },
+  "shape": {
+    "rSm": "10px", "rMd": "16px", "rLg": "22px", "rXl": "30px", "rFull": "999px",
+    "borderW": "3px",
+    "borderC": "#0E1830",
+    "stroke": "#0E1830"
+  },
+  "elevation": {
+    "card": "0 5px 0 #0E1830",
+    "btn": "0 5px 0 #0E1830",
+    "btnPress": "0 2px 0 #0E1830",
+    "glow": "0 0 18px rgba(255,176,32,0.35)",
+    "inset": "inset 0 2px 0 rgba(255,255,255,0.25)"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.34, 1.4, 0.64, 1)",
+    "durFast": "90ms", "dur": "160ms", "durSlow": "280ms",
+    "pressScale": "0.97"
+  },
+  "chrome": { "header": "banner", "button": "solid-shadow", "card": "thick-outline", "tab": "banner", "pattern": "none", "grain": false },
+  "extras": {}
+}

@@ -1,0 +1,58 @@
+{
+  "id": "volume",
+  "kind": "game",
+  "name": "立体风格",
+  "nameEn": "Volume / Skeuo 3D",
+  "summary": "斜面高光、内阴影多层堆叠、拟物按钮与面板，厚重可触",
+  "whenToUse": "主机/PC 风 RPG、策略、拟物经营、需要“实体按键感”的界面",
+  "palette": {
+    "bg": "#2A2634",
+    "bgAlt": "#221E2B",
+    "surface": "#3E3850",
+    "surface2": "#342E44",
+    "ink": "#F3EDE4",
+    "ink2": "#C9BFB4",
+    "ink3": "#8B8298",
+    "primary": "#E8A54B",
+    "primary2": "#C47F22",
+    "onPrimary": "#2A1C08",
+    "accent": "#6EC6FF",
+    "accent2": "#B085F5",
+    "ok": "#7DCE82",
+    "warn": "#E8C547",
+    "danger": "#E86A5B",
+    "line": "#4E4664",
+    "glass": "rgba(62,56,80,0.94)"
+  },
+  "type": {
+    "fontStack": "'Palatino Linotype','Songti SC','PingFang SC','Microsoft YaHei',Georgia,serif",
+    "weightDisplay": "700",
+    "weightBody": "500",
+    "weightStrong": "700",
+    "fsXs": "11px", "fsSm": "12px", "fsMd": "14px", "fsLg": "16px",
+    "fsXl": "20px", "fs2xl": "26px", "fs3xl": "32px",
+    "tracking": "0.03em"
+  },
+  "shape": {
+    "rSm": "6px", "rMd": "12px", "rLg": "16px", "rXl": "22px", "rFull": "999px",
+    "borderW": "1px",
+    "borderC": "#5A5270",
+    "stroke": "#1A1622"
+  },
+  "elevation": {
+    "card": "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.25), 0 6px 16px rgba(0,0,0,0.35)",
+    "btn": "inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -3px 0 rgba(0,0,0,0.28), 0 4px 8px rgba(0,0,0,0.35)",
+    "btnPress": "inset 0 2px 6px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.2)",
+    "glow": "0 0 20px rgba(232,165,75,0.35)",
+    "inset": "inset 0 2px 6px rgba(0,0,0,0.35)"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.3, 0.8, 0.3, 1)",
+    "durFast": "90ms", "dur": "160ms", "durSlow": "280ms",
+    "pressScale": "0.98"
+  },
+  "chrome": { "header": "bevel", "button": "bevel", "card": "bevel", "tab": "bevel", "pattern": "none", "grain": true },
+  "extras": {
+    "--ux-stage-bg": "radial-gradient(80% 60% at 50% 100%, rgba(232,165,75,0.10) 0%, transparent 60%)"
+  }
+}

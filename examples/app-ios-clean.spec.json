@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "title": "工作台",
+    "device": "phone",
+    "note": "示例：App 多 Tab 切换 + 设置开关 + 表格看板"
+  },
+  "kind": "app",
+  "style": "ios-clean",
+  "nav": {
+    "mode": "tabs",
+    "items": [
+      { "screen": "home", "label": "首页", "icon": "🏠" },
+      { "screen": "data", "label": "数据", "icon": "📊" },
+      { "screen": "me", "label": "我的", "icon": "👤" }
+    ]
+  },
+  "screens": [
+    {
+      "id": "home",
+      "title": "工作台",
+      "blocks": [
+        { "type": "search", "props": { "placeholder": "搜索订单 / 客户" } },
+        {
+          "type": "hero",
+          "props": {
+            "title": "今日待办 6",
+            "sub": "3 条高优先级 · 预计 2.5h",
+            "motif": "📋",
+            "cta": { "label": "开始处理", "toast": "开始处理待办" }
+          }
+        },
+        {
+          "type": "section",
+          "props": {
+            "title": "快捷入口",
+            "blocks": [
+              {
+                "type": "grid",
+                "props": {
+                  "cols": 4,
+                  "items": [
+                    { "icon": "📝", "title": "新建", "act": "toast", "toast": "新建工作项" },
+                    { "icon": "📤", "title": "审批", "act": "toast", "toast": "打开审批" },
+                    { "icon": "📅", "title": "日程", "act": "toast", "toast": "打开日程" },
+                    { "icon": "📁", "title": "文档", "to": "data" }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "section",
+          "props": {
+            "title": "最近",
+            "blocks": [
+              {
+                "type": "list",
+                "props": {
+                  "items": [
+                    { "icon": "🧾", "title": "Q3 预算复核", "sub": "财务 · 2 小时前", "to": "data" },
+                    { "icon": "🤝", "title": "客户 A 拜访纪要", "sub": "销售 · 昨天" },
+                    { "icon": "🚀", "title": "版本 1.2 发布 checklist", "sub": "研发 · 昨天" }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "数据",
+      "blocks": [
+        {
+          "type": "tabs",
+          "props": {
+            "items": [
+              { "label": "本周", "active": true },
+              { "label": "本月" },
+              { "label": "自定义" }
+            ]
+          }
+        },
+        {
+          "type": "stats",
+          "props": {
+            "items": [
+              { "label": "营收", "value": "¥128.4K", "icon": "💰", "tone": "primary" },
+              { "label": "订单", "value": "326", "icon": "📦" },
+              { "label": "转化", "value": "4.8%", "icon": "📈" }
+            ]
+          }
+        },
+        {
+          "type": "chart",
+          "props": {
+            "values": [42, 58, 35, 72, 64, 88, 76],
+            "labels": ["一", "二", "三", "四", "五", "六", "日"]
+          }
+        },
+        {
+          "type": "table",
+          "props": {
+            "head": ["渠道", "订单", "营收"],
+            "rows": [
+              ["直营", "128", "¥52,300"],
+              ["分销", "96", "¥41,200"],
+              ["线上", "102", "¥34,900"]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "me",
+      "title": "我的",
+      "blocks": [
+        {
+          "type": "profile",
+          "props": { "name": "陈小北", "sub": "产品策划 · 工号 2331", "avatar": "🧕" }
+        },
+        {
+          "type": "settings",
+          "props": {
+            "items": [
+              { "label": "消息通知", "desc": "推送审批与评论", "type": "toggle", "value": true },
+              { "label": "深色模式", "type": "toggle", "value": false },
+              { "label": "语言", "type": "select", "value": "简体中文" },
+              { "label": "关于", "type": "link", "value": "v1.0.0" }
+            ]
+          }
+        },
+        {
+          "type": "buttons",
+          "props": {
+            "items": [{ "label": "退出登录", "variant": "danger", "block": true, "act": "modal" }]
+          }
+        },
+        {
+          "type": "note",
+          "props": { "text": "开关可点击切换；退出登录会弹确认框。" }
+        }
+      ]
+    }
+  ]
+}

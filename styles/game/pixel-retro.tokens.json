@@ -1,0 +1,56 @@
+{
+  "id": "pixel-retro",
+  "kind": "game",
+  "name": "像素复古",
+  "nameEn": "Pixel Retro",
+  "summary": "限色盘、硬边框、位移实色阴影、等宽像素质感",
+  "whenToUse": "像素游戏、复古平台跳跃、Rogue、独立像素、怀旧向 UI",
+  "palette": {
+    "bg": "#1A1C2C",
+    "bgAlt": "#12141F",
+    "surface": "#29366F",
+    "surface2": "#1E2752",
+    "ink": "#F4F4F4",
+    "ink2": "#B8B8D0",
+    "ink3": "#6E6E90",
+    "primary": "#41A6F6",
+    "primary2": "#2D7DD2",
+    "onPrimary": "#0A0C14",
+    "accent": "#F7D002",
+    "accent2": "#73EFF7",
+    "ok": "#38B764",
+    "warn": "#FFCD75",
+    "danger": "#B13E53",
+    "line": "#0A0C14",
+    "glass": "rgba(26,28,44,0.95)"
+  },
+  "type": {
+    "fontStack": "'MS Gothic','Courier New','PingFang SC','Microsoft YaHei',monospace",
+    "weightDisplay": "700",
+    "weightBody": "500",
+    "weightStrong": "700",
+    "fsXs": "10px", "fsSm": "11px", "fsMd": "13px", "fsLg": "15px",
+    "fsXl": "18px", "fs2xl": "22px", "fs3xl": "28px",
+    "tracking": "0.06em"
+  },
+  "shape": {
+    "rSm": "0px", "rMd": "0px", "rLg": "0px", "rXl": "0px", "rFull": "0px",
+    "borderW": "3px",
+    "borderC": "#0A0C14",
+    "stroke": "#0A0C14"
+  },
+  "elevation": {
+    "card": "4px 4px 0 #0A0C14",
+    "btn": "4px 4px 0 #0A0C14",
+    "btnPress": "2px 2px 0 #0A0C14",
+    "glow": "none",
+    "inset": "none"
+  },
+  "motion": {
+    "ease": "steps(4, end)",
+    "durFast": "60ms", "dur": "120ms", "durSlow": "200ms",
+    "pressScale": "1"
+  },
+  "chrome": { "header": "pixel", "button": "pixel", "card": "pixel", "tab": "pixel", "pattern": "checker", "grain": false },
+  "extras": {}
+}

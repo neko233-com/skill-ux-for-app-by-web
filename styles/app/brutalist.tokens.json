@@ -1,0 +1,56 @@
+{
+  "id": "brutalist",
+  "kind": "app",
+  "name": "新粗野主义",
+  "nameEn": "Neo-Brutalism",
+  "summary": "粗黑描边、硬位移阴影、撞色块、大写粗排版",
+  "whenToUse": "创意工具、设计社区、营销活动页、需要强态度的产品",
+  "palette": {
+    "bg": "#FFF8E7",
+    "bgAlt": "#F5ECD7",
+    "surface": "#FFFFFF",
+    "surface2": "#FFF0C8",
+    "ink": "#111111",
+    "ink2": "#333333",
+    "ink3": "#6B6B6B",
+    "primary": "#FF5E3A",
+    "primary2": "#E04A28",
+    "onPrimary": "#FFFFFF",
+    "accent": "#3D7BFF",
+    "accent2": "#FFD23F",
+    "ok": "#2BB673",
+    "warn": "#FFB020",
+    "danger": "#E63946",
+    "line": "#111111",
+    "glass": "rgba(255,255,255,0.95)"
+  },
+  "type": {
+    "fontStack": "'Arial Black','PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif",
+    "weightDisplay": "900",
+    "weightBody": "500",
+    "weightStrong": "800",
+    "fsXs": "11px", "fsSm": "12px", "fsMd": "14px", "fsLg": "17px",
+    "fsXl": "22px", "fs2xl": "30px", "fs3xl": "38px",
+    "tracking": "0.02em"
+  },
+  "shape": {
+    "rSm": "4px", "rMd": "8px", "rLg": "12px", "rXl": "16px", "rFull": "999px",
+    "borderW": "3px",
+    "borderC": "#111111",
+    "stroke": "#111111"
+  },
+  "elevation": {
+    "card": "5px 5px 0 #111111",
+    "btn": "4px 4px 0 #111111",
+    "btnPress": "2px 2px 0 #111111",
+    "glow": "none",
+    "inset": "none"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.2, 0.9, 0.3, 1)",
+    "durFast": "80ms", "dur": "150ms", "durSlow": "240ms",
+    "pressScale": "1"
+  },
+  "chrome": { "header": "banner", "button": "hard", "card": "hard", "tab": "block", "pattern": "none", "grain": false },
+  "extras": {}
+}

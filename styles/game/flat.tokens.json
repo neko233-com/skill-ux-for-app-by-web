@@ -1,0 +1,56 @@
+{
+  "id": "flat",
+  "kind": "game",
+  "name": "扁平风格",
+  "nameEn": "Flat",
+  "summary": "无阴影纯色块、直角微圆、高对比色块分区、信息优先",
+  "whenToUse": "休闲游戏、教育游戏、工具型游戏 UI、需要清晰可读的活动页",
+  "palette": {
+    "bg": "#F4F6F8",
+    "bgAlt": "#E9EEF2",
+    "surface": "#FFFFFF",
+    "surface2": "#EEF2F5",
+    "ink": "#1F2933",
+    "ink2": "#52606D",
+    "ink3": "#9AA5B1",
+    "primary": "#2F80ED",
+    "primary2": "#1F6FD0",
+    "onPrimary": "#FFFFFF",
+    "accent": "#9B51E0",
+    "accent2": "#27AE60",
+    "ok": "#27AE60",
+    "warn": "#F2994A",
+    "danger": "#EB5757",
+    "line": "#E4E7EB",
+    "glass": "rgba(255,255,255,0.95)"
+  },
+  "type": {
+    "fontStack": "'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif",
+    "weightDisplay": "700",
+    "weightBody": "400",
+    "weightStrong": "600",
+    "fsXs": "11px", "fsSm": "12px", "fsMd": "14px", "fsLg": "16px",
+    "fsXl": "19px", "fs2xl": "24px", "fs3xl": "30px",
+    "tracking": "0"
+  },
+  "shape": {
+    "rSm": "4px", "rMd": "8px", "rLg": "12px", "rXl": "16px", "rFull": "999px",
+    "borderW": "1px",
+    "borderC": "#E4E7EB",
+    "stroke": "#1F2933"
+  },
+  "elevation": {
+    "card": "none",
+    "btn": "none",
+    "btnPress": "none",
+    "glow": "none",
+    "inset": "none"
+  },
+  "motion": {
+    "ease": "ease-out",
+    "durFast": "80ms", "dur": "150ms", "durSlow": "240ms",
+    "pressScale": "1"
+  },
+  "chrome": { "header": "solid", "button": "flat", "card": "flat", "tab": "underline", "pattern": "none", "grain": false },
+  "extras": {}
+}

@@ -1,0 +1,77 @@
+{
+  "id": "neko-crimson",
+  "kind": "game",
+  "name": "绯红主题",
+  "nameEn": "Custom",
+  "summary": "测试用自定义风格",
+  "whenToUse": "什么场景用它",
+  "palette": {
+    "bg": "#FFF5F5",
+    "bgAlt": "#FFE8E8",
+    "surface": "#FFFFFF",
+    "surface2": "#FFF0F0",
+    "ink": "#1A1A1A",
+    "ink2": "#555555",
+    "ink3": "#999999",
+    "primary": "#E63946",
+    "primary2": "#B02030",
+    "onPrimary": "#FFFFFF",
+    "accent": "#1D3557",
+    "accent2": "#33CCAA",
+    "ok": "#22AA66",
+    "warn": "#DDAA22",
+    "danger": "#DD4444",
+    "line": "#F0C8C8",
+    "glass": "rgba(255,255,255,0.9)"
+  },
+  "type": {
+    "fontStack": "'PingFang SC','Microsoft YaHei',system-ui,sans-serif",
+    "weightDisplay": "700",
+    "weightBody": "400",
+    "weightStrong": "600",
+    "fsXs": "11px",
+    "fsSm": "12px",
+    "fsMd": "14px",
+    "fsLg": "17px",
+    "fsXl": "20px",
+    "fs2xl": "26px",
+    "fs3xl": "32px",
+    "tracking": "0"
+  },
+  "shape": {
+    "rSm": "6px",
+    "rMd": "12px",
+    "rLg": "16px",
+    "rXl": "24px",
+    "rFull": "999px",
+    "borderW": "1px",
+    "borderC": "#E0E0E0",
+    "stroke": "#1A1A1A"
+  },
+  "elevation": {
+    "card": "0 4px 16px rgba(0,0,0,0.08)",
+    "btn": "0 2px 6px rgba(0,0,0,0.12)",
+    "btnPress": "none",
+    "glow": "none",
+    "inset": "none"
+  },
+  "motion": {
+    "ease": "ease-out",
+    "durFast": "100ms",
+    "dur": "200ms",
+    "durSlow": "320ms",
+    "pressScale": "0.97"
+  },
+  "chrome": {
+    "header": "default",
+    "button": "default",
+    "card": "default",
+    "tab": "default",
+    "pattern": "none",
+    "grain": false
+  },
+  "extras": {
+    "/* 在这里追加自定义 CSS 变量，例如：": "*/",
+    "--ux-extra-hue": "#FF00AA"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "id": "neon-arcade",
+  "kind": "game",
+  "name": "霓虹街机",
+  "nameEn": "Neon Arcade",
+  "summary": "深底霓虹描边、网格地面、扫描线、辉光文字——赛博街机厅",
+  "whenToUse": "赛博朋克、街机、音游、弹幕、电竞风小游戏",
+  "palette": {
+    "bg": "#0A0E1A",
+    "bgAlt": "#0D1322",
+    "surface": "rgba(16,24,44,0.92)",
+    "surface2": "#141C32",
+    "ink": "#E8F4FF",
+    "ink2": "#9FB8D4",
+    "ink3": "#5A7090",
+    "primary": "#FF2E88",
+    "primary2": "#C4005C",
+    "onPrimary": "#FFFFFF",
+    "accent": "#00F0FF",
+    "accent2": "#A855F7",
+    "ok": "#39FF88",
+    "warn": "#FFE600",
+    "danger": "#FF3355",
+    "line": "rgba(0,240,255,0.25)",
+    "glass": "rgba(10,14,26,0.78)"
+  },
+  "type": {
+    "fontStack": "'Rajdhani','Oxanium','PingFang SC','Microsoft YaHei',system-ui,sans-serif",
+    "weightDisplay": "700",
+    "weightBody": "500",
+    "weightStrong": "700",
+    "fsXs": "11px", "fsSm": "12px", "fsMd": "14px", "fsLg": "17px",
+    "fsXl": "21px", "fs2xl": "28px", "fs3xl": "34px",
+    "tracking": "0.08em"
+  },
+  "shape": {
+    "rSm": "4px", "rMd": "8px", "rLg": "12px", "rXl": "18px", "rFull": "999px",
+    "borderW": "1px",
+    "borderC": "rgba(0,240,255,0.4)",
+    "stroke": "#00F0FF"
+  },
+  "elevation": {
+    "card": "0 0 16px rgba(0,240,255,0.18), 0 8px 24px rgba(0,0,0,0.5)",
+    "btn": "0 0 14px rgba(255,46,136,0.45)",
+    "btnPress": "0 0 8px rgba(255,46,136,0.6)",
+    "glow": "0 0 24px rgba(0,240,255,0.5)",
+    "inset": "inset 0 0 20px rgba(0,240,255,0.08)"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.2, 0.9, 0.2, 1)",
+    "durFast": "90ms", "dur": "180ms", "durSlow": "320ms",
+    "pressScale": "0.95"
+  },
+  "chrome": { "header": "neon", "button": "neon", "card": "neon", "tab": "neon", "pattern": "grid-scan", "grain": false },
+  "extras": {}
+}

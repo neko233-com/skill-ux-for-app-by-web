@@ -1,0 +1,56 @@
+{
+  "id": "anime",
+  "kind": "game",
+  "name": "二次元",
+  "nameEn": "Anime",
+  "summary": "粉紫高饱和、白描边圆润卡片、闪光点缀、轻弹跳动效",
+  "whenToUse": "二次元手游、抽卡养成、偶像企划、Gal、看板娘系统",
+  "palette": {
+    "bg": "#FFF4F8",
+    "bgAlt": "#FFE8F1",
+    "surface": "#FFFFFF",
+    "surface2": "#FFF0F6",
+    "ink": "#3A2A4A",
+    "ink2": "#6E5A82",
+    "ink3": "#A892B8",
+    "primary": "#FF6B9D",
+    "primary2": "#E8457E",
+    "onPrimary": "#FFFFFF",
+    "accent": "#7B6CFF",
+    "accent2": "#5BC8FF",
+    "ok": "#3ECF8E",
+    "warn": "#FFB020",
+    "danger": "#FF4D6A",
+    "line": "#F5D6E4",
+    "glass": "rgba(255,255,255,0.82)"
+  },
+  "type": {
+    "fontStack": "'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif",
+    "weightDisplay": "800",
+    "weightBody": "500",
+    "weightStrong": "700",
+    "fsXs": "11px", "fsSm": "12px", "fsMd": "14px", "fsLg": "16px",
+    "fsXl": "19px", "fs2xl": "24px", "fs3xl": "30px",
+    "tracking": "0.02em"
+  },
+  "shape": {
+    "rSm": "8px", "rMd": "14px", "rLg": "20px", "rXl": "28px", "rFull": "999px",
+    "borderW": "2px",
+    "borderC": "#FFFFFF",
+    "stroke": "#3A2A4A"
+  },
+  "elevation": {
+    "card": "0 4px 0 rgba(58,42,74,0.08), 0 10px 24px rgba(232,69,126,0.10)",
+    "btn": "0 3px 0 rgba(58,42,74,0.14)",
+    "btnPress": "0 1px 0 rgba(58,42,74,0.14)",
+    "glow": "0 0 22px rgba(255,107,157,0.40)",
+    "inset": "inset 0 1px 0 rgba(255,255,255,0.7)"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.34, 1.45, 0.64, 1)",
+    "durFast": "110ms", "dur": "200ms", "durSlow": "320ms",
+    "pressScale": "0.96"
+  },
+  "chrome": { "header": "soft", "button": "chunky", "card": "outlined-soft", "tab": "pill", "pattern": "sparkle", "grain": false },
+  "extras": {}
+}

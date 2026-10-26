@@ -1,0 +1,56 @@
+{
+  "id": "glass",
+  "kind": "app",
+  "name": "玻璃拟态",
+  "nameEn": "Glassmorphism",
+  "summary": "半透明毛玻璃卡片、彩色光斑底、内高光描边",
+  "whenToUse": "创意官网、活动页、音乐/媒体类、需要高级氛围感的产品",
+  "palette": {
+    "bg": "#0F1222",
+    "bgAlt": "#141830",
+    "surface": "rgba(255,255,255,0.10)",
+    "surface2": "rgba(255,255,255,0.06)",
+    "ink": "#F5F7FF",
+    "ink2": "rgba(245,247,255,0.72)",
+    "ink3": "rgba(245,247,255,0.45)",
+    "primary": "#7C9CFF",
+    "primary2": "#5B7CFA",
+    "onPrimary": "#0B1020",
+    "accent": "#C084FC",
+    "accent2": "#67E8F9",
+    "ok": "#4ADE80",
+    "warn": "#FBBF24",
+    "danger": "#FB7185",
+    "line": "rgba(255,255,255,0.22)",
+    "glass": "rgba(255,255,255,0.12)"
+  },
+  "type": {
+    "fontStack": "'Inter','SF Pro Display','PingFang SC','Microsoft YaHei',system-ui,sans-serif",
+    "weightDisplay": "700",
+    "weightBody": "400",
+    "weightStrong": "600",
+    "fsXs": "11px", "fsSm": "12px", "fsMd": "14px", "fsLg": "17px",
+    "fsXl": "21px", "fs2xl": "28px", "fs3xl": "36px",
+    "tracking": "-0.01em"
+  },
+  "shape": {
+    "rSm": "10px", "rMd": "16px", "rLg": "22px", "rXl": "30px", "rFull": "999px",
+    "borderW": "1px",
+    "borderC": "rgba(255,255,255,0.30)",
+    "stroke": "rgba(255,255,255,0.5)"
+  },
+  "elevation": {
+    "card": "0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.35)",
+    "btn": "0 4px 16px rgba(0,0,0,0.25)",
+    "btnPress": "0 2px 8px rgba(0,0,0,0.2)",
+    "glow": "0 0 28px rgba(124,156,255,0.45)",
+    "inset": "inset 0 1px 0 rgba(255,255,255,0.4)"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "durFast": "120ms", "dur": "240ms", "durSlow": "400ms",
+    "pressScale": "0.97"
+  },
+  "chrome": { "header": "blur", "button": "glass", "card": "glass", "tab": "blur", "pattern": "aurora", "grain": false },
+  "extras": {}
+}

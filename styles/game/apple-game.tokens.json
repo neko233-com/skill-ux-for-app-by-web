@@ -1,0 +1,58 @@
+{
+  "id": "apple-game",
+  "kind": "game",
+  "name": "苹果风格",
+  "nameEn": "Apple Game",
+  "summary": "毛玻璃层级、系统字、细腻渐变、大圆角、克制阴影——游戏 HUD 的苹果化",
+  "whenToUse": "轻量游戏、Apple Arcade 观感、休闲益智、需要高级感的游戏 UI",
+  "palette": {
+    "bg": "#F2F2F7",
+    "bgAlt": "#E8E8ED",
+    "surface": "rgba(255,255,255,0.86)",
+    "surface2": "#F2F2F7",
+    "ink": "#1C1C1E",
+    "ink2": "#48484A",
+    "ink3": "#8E8E93",
+    "primary": "#0A84FF",
+    "primary2": "#0070E0",
+    "onPrimary": "#FFFFFF",
+    "accent": "#FF375F",
+    "accent2": "#BF5AF2",
+    "ok": "#30D158",
+    "warn": "#FFD60A",
+    "danger": "#FF453A",
+    "line": "rgba(60,60,67,0.16)",
+    "glass": "rgba(255,255,255,0.72)"
+  },
+  "type": {
+    "fontStack": "-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','Helvetica Neue','Microsoft YaHei',system-ui,sans-serif",
+    "weightDisplay": "700",
+    "weightBody": "400",
+    "weightStrong": "600",
+    "fsXs": "11px", "fsSm": "13px", "fsMd": "15px", "fsLg": "17px",
+    "fsXl": "20px", "fs2xl": "26px", "fs3xl": "32px",
+    "tracking": "-0.01em"
+  },
+  "shape": {
+    "rSm": "8px", "rMd": "14px", "rLg": "20px", "rXl": "28px", "rFull": "999px",
+    "borderW": "0.5px",
+    "borderC": "rgba(60,60,67,0.12)",
+    "stroke": "#1C1C1E"
+  },
+  "elevation": {
+    "card": "0 1px 0 rgba(255,255,255,0.6) inset, 0 8px 28px rgba(0,0,0,0.08)",
+    "btn": "0 1px 2px rgba(0,0,0,0.12)",
+    "btnPress": "0 0 0 rgba(0,0,0,0)",
+    "glow": "0 0 24px rgba(10,132,255,0.28)",
+    "inset": "inset 0 1px 0 rgba(255,255,255,0.75)"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.25, 0.1, 0.25, 1)",
+    "durFast": "100ms", "dur": "220ms", "durSlow": "380ms",
+    "pressScale": "0.97"
+  },
+  "chrome": { "header": "blur", "button": "gradient", "card": "glass", "tab": "blur", "pattern": "none", "grain": false },
+  "extras": {
+    "--ux-stage-bg": "radial-gradient(90% 70% at 50% 0%, #E8F0FF 0%, transparent 60%)"
+  }
+}

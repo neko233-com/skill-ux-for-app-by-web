@@ -1,0 +1,56 @@
+{
+  "id": "business",
+  "kind": "app",
+  "name": "商务后台",
+  "nameEn": "Business Console",
+  "summary": "低饱和企业蓝、高信息密度、表格/表单优先、克制动效",
+  "whenToUse": "SaaS 后台、数据看板、审批流、B 端管理系统",
+  "palette": {
+    "bg": "#F5F7FA",
+    "bgAlt": "#EAEFF5",
+    "surface": "#FFFFFF",
+    "surface2": "#F5F7FA",
+    "ink": "#1F2937",
+    "ink2": "#4B5563",
+    "ink3": "#9CA3AF",
+    "primary": "#1677FF",
+    "primary2": "#0E5FD8",
+    "onPrimary": "#FFFFFF",
+    "accent": "#722ED1",
+    "accent2": "#13C2C2",
+    "ok": "#52C41A",
+    "warn": "#FAAD14",
+    "danger": "#FF4D4F",
+    "line": "#E5E7EB",
+    "glass": "rgba(255,255,255,0.95)"
+  },
+  "type": {
+    "fontStack": "-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',system-ui,sans-serif",
+    "weightDisplay": "600",
+    "weightBody": "400",
+    "weightStrong": "600",
+    "fsXs": "12px", "fsSm": "13px", "fsMd": "14px", "fsLg": "16px",
+    "fsXl": "18px", "fs2xl": "22px", "fs3xl": "28px",
+    "tracking": "0"
+  },
+  "shape": {
+    "rSm": "4px", "rMd": "6px", "rLg": "8px", "rXl": "12px", "rFull": "999px",
+    "borderW": "1px",
+    "borderC": "#E5E7EB",
+    "stroke": "#1F2937"
+  },
+  "elevation": {
+    "card": "0 1px 2px rgba(0,0,0,0.04)",
+    "btn": "none",
+    "btnPress": "none",
+    "glow": "none",
+    "inset": "none"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.4, 0, 0.2, 1)",
+    "durFast": "100ms", "dur": "180ms", "durSlow": "280ms",
+    "pressScale": "0.99"
+  },
+  "chrome": { "header": "flat", "button": "fill", "card": "bordered", "tab": "underline", "pattern": "none", "grain": false },
+  "extras": {}
+}
