@@ -104,6 +104,90 @@ function loadStyle(styleId, kind, specTokens) {
   return tokens;
 }
 
+/* ── Icons ────────────────────────────────────── */
+const ICONS = JSON.parse(read(join(__dirname, "icons.json")));
+delete ICONS._comment;
+const ICON_NAMES = Object.keys(ICONS);
+
+function iconHtml(name, size = 20, cls = "") {
+  if (!name) return "";
+  const key = String(name).trim();
+  const id = key.startsWith("icon:") ? key.slice(5) : key;
+  if (ICONS[id]) {
+    const s = Number(size) || 20;
+    return `<svg class="ux-icon${cls ? " " + cls : ""}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-${esc(id)}"/></svg>`;
+  }
+  return esc(key);
+}
+
+function iconSprite() {
+  const symbols = ICON_NAMES.map((name) => {
+    const d = ICONS[name];
+    const paths = String(d).split("|").map((p) => `<path d="${p.trim()}"/>`).join("");
+    return `<symbol id="uxi-${esc(name)}" viewBox="0 0 24 24">${paths}</symbol>`;
+  }).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">${symbols}</svg>`;
+}
+
+function ico(props, size = 20) {
+  if (!props) return "";
+  if (typeof props === "string") return iconHtml(props, size);
+  if (props && props.name) return iconHtml(props.name, props.size || size);
+  return "";
+}
+
+/* ── 状态包裹 ─────────────────────────────────── */
+function wrapState(block, html, props = {}) {
+  const st = props.state || "ready";
+  if (st === "ready") return html;
+  const anim = block.anim ? ` anim-${esc(block.anim)}` : "";
+  if (st === "loading") {
+    const rows = Number(props.skeletonRows || 4);
+    let sk = "";
+    for (let i = 0; i < rows; i++) {
+      sk += `<div class="ux-skeleton-row"><div class="ux-skeleton ux-skeleton--avatar"></div><div class="body"><div class="ux-skeleton ux-skeleton--text" style="width:${50 + (i % 3) * 15}%"></div><div class="ux-skeleton ux-skeleton--text" style="width:${30 + (i % 2) * 20}%;height:10px"></div></div></div>`;
+    }
+    return `<div class="ux-list${anim}" aria-busy="true">${sk}</div>`;
+  }
+  if (st === "empty" || st === "error") {
+    const isErr = st === "error";
+    const icon = props.emptyIcon || (isErr ? "alert-triangle" : "inbox");
+    const title = props.emptyTitle || (isErr ? "加载失败" : "暂无数据");
+    const desc = props.emptyDesc || (isErr ? "网络似乎开小差了，点击重试" : "这里还什么都没有");
+    const action = props.emptyAction
+      ? `<button class="ux-btn ${isErr ? "ux-btn--primary" : ""} ux-btn--sm ux-empty__action" data-act="toast" data-toast="${esc(props.emptyActionToast || props.emptyAction)}">${esc(props.emptyAction)}</button>`
+      : "";
+    return `<div class="ux-empty${isErr ? " ux-empty--error" : ""}${anim}"><div class="ux-empty__icon">${iconHtml(icon, 24)}</div><div class="ux-empty__title">${esc(title)}</div><p class="ux-empty__desc">${esc(desc)}</p>${action}</div>`;
+  }
+  if (st === "disabled") {
+    return `<div class="ux-state-disabled${anim}" aria-disabled="true">${html}</div>`;
+  }
+  return html;
+}
+
+function badgeHtml(b, asDot = false) {
+  if (b == null || b === false) return "";
+  if (b === true) return asDot ? `<span class="ux-dot ux-dot--pulse"></span>` : `<span class="ux-badge">1</span>`;
+  if (typeof b === "number") return `<span class="ux-badge">${esc(b > 99 ? "99+" : b)}</span>`;
+  if (typeof b === "string") {
+    if (b === "dot" || b === "pulse") return `<span class="ux-dot${b === "pulse" ? " ux-dot--pulse" : ""}"></span>`;
+    return `<span class="ux-badge">${esc(b)}</span>`;
+  }
+  const tone = b.tone ? ` ux-badge--${esc(b.tone)}` : "";
+  if (b.type === "dot" || b.dot) {
+    return `<span class="ux-dot${b.tone ? ` ux-dot--${esc(b.tone)}` : ""}${b.pulse === false ? "" : " ux-dot--pulse"}${b.size ? ` ux-dot--${esc(b.size)}` : ""}"></span>`;
+  }
+  if (b.type === "none") return "";
+  const val = b.value != null ? b.value : "";
+  if (val === "") return `<span class="ux-badge ux-badge--dot${tone}"></span>`;
+  return `<span class="ux-badge${tone}">${esc(String(val).length > 3 ? "99+" : val)}</span>`;
+}
+
+function animWrap(block, html) {
+  if (!block.anim) return html;
+  return `<div class="anim-${esc(block.anim)}">${html}</div>`;
+}
+
 /* ── CSS 变量 ────────────────────────────────── */
 function tokensToCss(t) {
   const p = t.palette, ty = t.type, sh = t.shape, el = t.elevation, mo = t.motion;
@@ -172,10 +256,17 @@ function tokensToCss(t) {
 function blockHtml(b, ctx) {
   const type = b.type;
   const p = b.props || {};
+  const raw = blockHtmlInner(b, ctx);
+  return wrapState(b, animWrap(b, raw), p);
+}
+
+function blockHtmlInner(b, ctx) {
+  const type = b.type;
+  const p = b.props || {};
   switch (type) {
     case "titlebar": {
       const back = p.back !== false && ctx.screens.length > 1
-        ? `<button class="ux-titlebar__back" data-act="back" aria-label="返回">‹</button>`
+        ? `<button class="ux-titlebar__back" data-act="back" aria-label="返回">${iconHtml("chevron-left", 18)}</button>`
         : `<span class="ux-titlebar__back" style="visibility:hidden"></span>`;
       const actions = (p.actions || []).map((a) =>
         a.to
@@ -190,7 +281,7 @@ function blockHtml(b, ctx) {
             ? `<button class="ux-btn" data-goto="${esc(p.cta.to)}">${esc(p.cta.label)}</button>`
             : `<button class="ux-btn" data-act="toast" data-toast="${esc(p.cta.toast || p.cta.label)}">${esc(p.cta.label)}</button>`}</div>`
         : "";
-      return `<section class="ux-hero"><div class="ux-hero__motif" aria-hidden="true">${esc(p.motif || "✨")}</div><h2 class="ux-hero__title">${esc(p.title || ctx.meta.title)}</h2>${p.sub ? `<p class="ux-hero__sub">${esc(p.sub)}</p>` : ""}${cta}</section>`;
+      return `<section class="ux-hero"><div class="ux-hero__motif" aria-hidden="true">${ico(p.motif, 84) || esc(p.motif || "✨")}</div><h2 class="ux-hero__title">${esc(p.title || ctx.meta.title)}</h2>${p.sub ? `<p class="ux-hero__sub">${esc(p.sub)}</p>` : ""}${cta}</section>`;
     }
     case "section": {
       const head = p.title
@@ -202,34 +293,42 @@ function blockHtml(b, ctx) {
     case "grid": {
       const cols = Math.min(4, Math.max(2, p.cols || 3));
       const items = (p.items || []).map((it) => {
-        const badge = it.badge != null ? `<span class="ux-tile__badge">${esc(it.badge)}</span>` : "";
+        const badge = badgeHtml(it.badge);
+        const iconEl = ico(it.icon, 28) || `<span class="ux-tile__icon">${esc(it.icon || "📦")}</span>`;
         const attrs = it.to ? ` data-goto="${esc(it.to)}"` : it.act ? ` data-act="${esc(it.act)}" data-toast="${esc(it.toast || it.title)}"` : "";
-        return `<button class="ux-tile"${attrs}>${badge}<span class="ux-tile__icon">${esc(it.icon || "📦")}</span><span class="ux-tile__title">${esc(it.title || "")}</span>${it.sub ? `<span class="ux-tile__sub">${esc(it.sub)}</span>` : ""}</button>`;
+        return `<button class="ux-tile"${attrs}>${badge}${iconEl}<span class="ux-tile__title">${esc(it.title || "")}</span>${it.sub ? `<span class="ux-tile__sub">${esc(it.sub)}</span>` : ""}</button>`;
       }).join("\n");
       return `<div class="ux-grid" data-cols="${cols}">${items}</div>`;
     }
     case "list": {
       const rows = (p.items || []).map((it) => {
         const attrs = it.to ? ` data-goto="${esc(it.to)}"` : "";
-        const trail = it.trailing
-          ? `<span class="ux-row__trail">${esc(it.trailing)}</span>`
-          : it.badge != null
-            ? `<span class="ux-row__trail"><span class="ux-row__badge">${esc(it.badge)}</span>›</span>`
-            : it.to ? `<span class="ux-row__trail">›</span>` : "";
-        return `<div class="ux-row"${attrs} ${it.to ? 'role="button" tabindex="0"' : ""}>${it.icon ? `<span class="ux-row__icon">${esc(it.icon)}</span>` : ""}<div class="ux-row__body"><div class="ux-row__title">${esc(it.title || "")}</div>${it.sub ? `<div class="ux-row__sub">${esc(it.sub)}</div>` : ""}</div>${trail}</div>`;
+        const trailBits = [];
+        if (it.trailing) trailBits.push(`<span class="ux-row__trail">${esc(it.trailing)}</span>`);
+        else {
+          const asDot = it.badge === true || it.badge === "dot" || it.badge === "pulse" || (it.badge && it.badge.dot);
+          const bd = badgeHtml(it.badge, asDot);
+          if (bd) trailBits.push(`<span class="ux-row__trail">${bd}</span>`);
+          if (it.to) trailBits.push(`<span class="ux-row__trail">${iconHtml("chevron-right", 16)}</span>`);
+        }
+        const trail = trailBits.join("");
+        return `<div class="ux-row"${attrs} ${it.to ? 'role="button" tabindex="0"' : ""}>${it.icon ? `<span class="ux-row__icon">${ico(it.icon, 20) || esc(it.icon)}</span>` : ""}<div class="ux-row__body"><div class="ux-row__title">${esc(it.title || "")}</div>${it.sub ? `<div class="ux-row__sub">${esc(it.sub)}</div>` : ""}</div>${trail}</div>`;
       }).join("\n");
       return `<div class="ux-list">${rows}</div>`;
     }
     case "stats": {
       const chips = (p.items || []).map((it) => {
         const cls = it.tone === "primary" ? " ux-chip--primary" : "";
-        return `<span class="ux-chip${cls}">${it.icon ? `<span class="ux-chip__icon">${esc(it.icon)}</span>` : ""}${it.label ? `<span class="ux-chip__label">${esc(it.label)}</span>` : ""}<span class="ux-chip__value">${esc(it.value ?? "")}</span></span>`;
+        const countAttr = it.countTo != null ? ` data-count-to="${esc(it.countTo)}" data-count-from="${esc(it.countFrom ?? 0)}" data-count-prefix="${esc(it.countPrefix || "")}" data-count-suffix="${esc(it.countSuffix || "")}"` : "";
+        const valTxt = it.value != null ? esc(it.value) : (it.countTo != null ? "0" : "");
+        return `<span class="ux-chip${cls}">${it.icon ? `<span class="ux-chip__icon">${ico(it.icon, 15) || esc(it.icon)}</span>` : ""}${it.label ? `<span class="ux-chip__label">${esc(it.label)}</span>` : ""}<span class="ux-chip__value"${countAttr}>${valTxt}</span></span>`;
       }).join("\n");
       return `<div class="ux-stats">${chips}</div>`;
     }
     case "progress": {
       const v = Math.max(0, Math.min(1, Number(p.value ?? 0)));
       const valTxt = p.showValue === false ? "" : `<span>${Math.round(v * 100)}%</span>`;
+      if (p.indeterminate) return `<div class="ux-progress"><div class="ux-progress__head"><span>${esc(p.label || "加载中")}</span></div><div class="ux-progress__track"><div class="ux-progress__bar is-indeterminate"></div></div></div>`;
       return `<div class="ux-progress"><div class="ux-progress__head"><span>${esc(p.label || "进度")}</span>${valTxt}</div><div class="ux-progress__track"><div class="ux-progress__bar" data-value="${v}"></div></div></div>`;
     }
     case "buttons": {
@@ -242,7 +341,7 @@ function blockHtml(b, ctx) {
           : b2.act
             ? ` data-act="${esc(b2.act)}" data-toast="${esc(b2.toast || b2.label)}"`
             : ` data-act="toast" data-toast="${esc(b2.toast || b2.label || "已点击")}"`
-        return `<button class="ux-btn${variant}${size}${block}"${attrs}>${esc(b2.label || "按钮")}</button>`;
+        return `<button class="ux-btn${variant}${size}${block}"${attrs}>${b2.icon ? ico(b2.icon, 18) : ""}${esc(b2.label || "按钮")}</button>`;
       }).join("\n");
       return `<div class="ux-buttons">${btns}</div>`;
     }
@@ -265,8 +364,8 @@ function blockHtml(b, ctx) {
       const rows = (p.items || []).map((it) => {
         let trail = "";
         if (it.type === "toggle") trail = `<button class="ux-toggle${it.value ? " is-on" : ""}" aria-checked="${it.value ? "true" : "false"}"></button>`;
-        else if (it.type === "select") trail = `<span class="ux-row__trail">${esc(it.value || "默认")} ›</span>`;
-        else trail = `<span class="ux-row__trail">${esc(it.value || "")} ›</span>`;
+        else if (it.type === "select") trail = `<span class="ux-row__trail">${esc(it.value || "默认")} ${iconHtml("chevron-down", 14)}</span>`;
+        else trail = `<span class="ux-row__trail">${esc(it.value || "")} ${iconHtml("chevron-right", 14)}</span>`;
         return `<div class="ux-row" ${it.to ? `data-goto="${esc(it.to)}"` : ""}><div class="ux-row__body"><div class="ux-row__title">${esc(it.label || "")}</div>${it.desc ? `<div class="ux-row__sub">${esc(it.desc)}</div>` : ""}</div>${trail}</div>`;
       }).join("\n");
       return `<div class="ux-list">${rows}</div>`;
@@ -278,9 +377,9 @@ function blockHtml(b, ctx) {
       return `<div class="ux-carousel" role="list">${items}</div>`;
     }
     case "note":
-      return `<aside class="ux-note">${p.text && /[<&]/.test(p.text) ? p.text : `<strong>策划注</strong> · ${esc(p.text || "")}`}</aside>`;
+      return `<aside class="ux-note">${p.text && /[<&]/.test(p.text) ? p.text : `<strong>${iconHtml(p.icon || "info", 12)} 策划注</strong> · ${esc(p.text || "")}`}</aside>`;
     case "search":
-      return `<div class="ux-search"><span class="ux-search__icon">🔍</span><input class="ux-input" type="search" placeholder="${esc(p.placeholder || "搜索")}"></div>`;
+      return `<div class="ux-search"><span class="ux-search__icon">${iconHtml("search", 16)}</span><input class="ux-input" type="search" placeholder="${esc(p.placeholder || "搜索")}"></div>`;
     case "tabs": {
       const items = (p.items || []).map((it, i) =>
         `<button class="ux-seg__item${(it.active ?? i === 0) ? " is-active" : ""}" type="button">${esc(it.label || "")}</button>`
@@ -294,7 +393,7 @@ function blockHtml(b, ctx) {
       return `<div class="ux-stepper">${items}</div>`;
     }
     case "profile":
-      return `<div class="ux-profile"><div class="ux-profile__avatar">${esc(p.avatar || "🙂")}</div><div><h3 class="ux-profile__name">${esc(p.name || "用户")}</h3><p class="ux-profile__sub">${esc(p.sub || "")}</p></div></div>`;
+      return `<div class="ux-profile"><div class="ux-profile__avatar">${ico(p.avatar, 28) || esc(p.avatar || "🙂")}</div><div><h3 class="ux-profile__name">${esc(p.name || "用户")}</h3><p class="ux-profile__sub">${esc(p.sub || "")}</p></div></div>`;
     case "chart": {
       const values = (p.values || []).map(Number);
       const max = Math.max(...values, 1);
@@ -315,12 +414,12 @@ function blockHtml(b, ctx) {
     /* game-only */
     case "currency": {
       const items = (p.items || []).map((it) =>
-        `<span class="ux-currency__item"><span class="icon">${esc(it.icon || "💰")}</span><span>${esc(it.value ?? "0")}</span>${it.plus !== false ? `<button class="ux-currency__plus" data-act="toast" data-toast="打开${esc(it.label || "货币")}充值" aria-label="增加">+</button>` : ""}</span>`
+        `<span class="ux-currency__item"><span class="icon">${ico(it.icon, 15) || esc(it.icon || "💰")}</span><span>${esc(it.value ?? "0")}</span>${it.plus !== false ? `<button class="ux-currency__plus" data-act="toast" data-toast="打开${esc(it.label || "货币")}充值" aria-label="增加">+</button>` : ""}</span>`
       ).join("");
       return `<div class="ux-currency">${items}</div>`;
     }
     case "player-bar":
-      return `<div class="ux-player"><div class="ux-player__avatar">${esc(p.avatar || "🧝")}</div><div class="ux-player__meta"><div><span class="ux-player__name">${esc(p.name || "旅人")}</span><span class="ux-player__level">Lv.${esc(p.level ?? 1)}</span></div><div class="ux-player__exp"><i data-value="${Math.max(0, Math.min(1, Number(p.exp ?? 0)))}"></i></div></div></div>`;
+      return `<div class="ux-player"><div class="ux-player__avatar">${ico(p.avatar, 24) || esc(p.avatar || "🧝")}</div><div class="ux-player__meta"><div><span class="ux-player__name">${esc(p.name || "旅人")}</span><span class="ux-player__level">Lv.${esc(p.level ?? 1)}</span></div><div class="ux-player__exp"><i data-value="${Math.max(0, Math.min(1, Number(p.exp ?? 0)))}"></i></div></div></div>`;
     case "hp-bar": {
       const hp = Number(p.hp ?? p.max ?? 100);
       const max = Number(p.max ?? Math.max(hp, 1));
@@ -330,13 +429,13 @@ function blockHtml(b, ctx) {
     }
     case "skill-bar": {
       const items = (p.items || []).map((it) =>
-        `<button class="ux-skill" data-act="skill" data-name="${esc(it.name || "技能")}" data-cd="${esc(it.cd ?? "")}">${it.cost ? `<span class="ux-skill__cost">${esc(it.cost)}</span>` : ""}<span class="ux-skill__icon">${esc(it.icon || "💥")}</span><span class="ux-skill__name">${esc(it.name || "技能")}</span></button>`
+        `<button class="ux-skill" data-act="skill" data-name="${esc(it.name || "技能")}" data-cd="${esc(it.cd ?? "")}">${it.cost ? `<span class="ux-skill__cost">${esc(it.cost)}</span>` : ""}<span class="ux-skill__icon">${ico(it.icon, 26) || esc(it.icon || "💥")}</span><span class="ux-skill__name">${esc(it.name || "技能")}</span></button>`
       ).join("");
       return `<div class="ux-skills">${items}</div>`;
     }
     case "dock": {
       const items = (p.items || []).map((it) =>
-        `<button class="ux-tabbar__item" data-goto-tab="${esc(it.to || "#")}" type="button"><span class="icon">${esc(it.icon || "📦")}</span><span>${esc(it.label || "")}</span>${it.badge ? `<span class="ux-tabbar__badge">${esc(it.badge)}</span>` : ""}</button>`
+        `<button class="ux-tabbar__item" data-goto-tab="${esc(it.to || "#")}" type="button"><span class="icon">${ico(it.icon, 22) || esc(it.icon || "📦")}</span><span>${esc(it.label || "")}</span>${badgeHtml(it.badge)}</button>`
       ).join("");
       return `<nav class="ux-tabbar" aria-label="主导航">${items}</nav>`;
     }
@@ -357,14 +456,30 @@ function blockHtml(b, ctx) {
     }
     case "inventory": {
       const items = (p.items || []).map((it) =>
-        `<button class="ux-inv__slot" data-rarity="${esc(it.rarity || "common")}" data-act="toast" data-toast="${esc(it.name || "道具")}"><span class="ux-inv__icon">${esc(it.icon || "❔")}</span>${it.qty ? `<span class="ux-inv__qty">${esc(it.qty)}</span>` : ""}</button>`
+        `<button class="ux-inv__slot" data-rarity="${esc(it.rarity || "common")}" data-act="toast" data-toast="${esc(it.name || "道具")}"><span class="ux-inv__icon">${ico(it.icon, 26) || esc(it.icon || "❔")}</span>${it.qty ? `<span class="ux-inv__qty">${esc(it.qty)}</span>` : ""}</button>`
       ).join("");
       return `<div class="ux-inv">${items}</div>`;
     }
     case "joystick-hint":
       return `<div class="ux-stick" aria-hidden="true"><div class="ux-stick__pad"></div><div class="ux-stick__btns"><span class="ux-stick__abtn">✕</span><span class="ux-stick__abtn ux-stick__abtn--main">⚔️</span></div></div>`;
     case "gacha-banner":
-      return `<button class="ux-gacha" type="button" ${p.to ? `data-goto="${esc(p.to)}"` : `data-act="toast" data-toast="${esc(p.toast || "进入祈愿")}"`}><span class="ux-gacha__star" aria-hidden="true">${esc(p.motif || "🌟")}</span><h3 class="ux-gacha__title">${esc(p.title || "限定祈愿")}</h3>${p.sub ? `<p class="ux-gacha__sub">${esc(p.sub)}</p>` : ""}<span class="ux-gacha__cta">${esc(p.cta || "查看详情")}</span></button>`;
+      return `<button class="ux-gacha" type="button" ${p.to ? `data-goto="${esc(p.to)}"` : `data-act="toast" data-toast="${esc(p.toast || "进入祈愿")}"`}><span class="ux-gacha__star" aria-hidden="true">${ico(p.motif, 64) || esc(p.motif || "🌟")}</span><h3 class="ux-gacha__title">${esc(p.title || "限定祈愿")}</h3>${p.sub ? `<p class="ux-gacha__sub">${esc(p.sub)}</p>` : ""}<span class="ux-gacha__cta">${esc(p.cta || "查看详情")}</span></button>`;
+    case "state-switcher": {
+      const hostId = p.for || ("st-" + ctx.screen.id + "-" + (ctx._ss = (ctx._ss || 0) + 1));
+      const states = p.states || ["ready", "loading", "empty", "error"];
+      const labels = { ready: "正常", loading: "加载", empty: "空态", error: "错误", disabled: "禁用" };
+      const btns = states.map((st, i) => `<button class="ux-state-switch__btn${(p.active || states[0]) === st ? " is-active" : ""}" data-state="${esc(st)}" type="button">${esc(labels[st] || st)}</button>`).join("");
+      return `<div class="ux-state-switch" data-for="${esc(hostId)}" role="group" aria-label="状态演示"><span class="ux-state-switch__label">状态演示 · 点击切换</span>${btns}</div><div class="ux-state-host" id="${esc(hostId)}"></div>`;
+    }
+    case "state-views": {
+      const hostId = p.for || ctx.screen.id + "-views";
+      const views = (p.views || []).map((v) => {
+        const inner = (v.blocks || []).map((c) => blockHtml(c, ctx)).join("\n");
+        const shown = (v.state || "ready") === (p.active || "ready") ? " is-shown" : "";
+        return `<div class="ux-state-view${shown}" data-state="${esc(v.state || "ready")}">${inner}</div>`;
+      }).join("\n");
+      return `<div class="ux-state-host" id="${esc(hostId)}">${views}</div>`;
+    }
     default:
       return `<!-- unknown block: ${esc(type)} -->`;
   }
@@ -429,19 +544,35 @@ function buildHtml(spec, tokens) {
     let blocks = (screen.blocks || []).slice();
     const tb = autoTitlebar(spec, screen);
     if (tb && chromeMode !== "none") blocks = [tb, ...blocks];
-    const body = blocks.map((b) => blockHtml(b, ctx)).join("\n");
     const dataAttrs = [
       `data-screen="${esc(screen.id)}"`,
       `data-title="${esc(screen.title || screen.id)}"`,
     ].join(" ");
-    return `<section class="ux-screen" ${dataAttrs}>\n${body}\n</section>`;
+    const trans = screen.transition ? ` data-transition="${esc(screen.transition)}"` : "";
+    const scStagger = (meta.stagger === true || meta.stagger === "screen" || screen.stagger) ? " data-stagger" : "";
+    // sticky head: titlebar + currency stay outside scroll
+    let headHtml = "";
+    let restBlocks = blocks.slice();
+    if (chromeMode !== "none" && restBlocks[0]?.type === "titlebar") {
+      headHtml += blockHtml(restBlocks[0], ctx);
+      restBlocks = restBlocks.slice(1);
+    }
+    if (chromeMode !== "none" && restBlocks[0]?.type === "currency") {
+      headHtml += blockHtml(restBlocks[0], ctx);
+      restBlocks = restBlocks.slice(1);
+    }
+    const restHtml = restBlocks.map((b) => blockHtml(b, ctx)).join("\n");
+    const bodyHtml = chromeMode === "none"
+      ? restHtml
+      : `${headHtml}<div class="ux-scroll"${scStagger}>\n${restHtml}\n</div>`;
+    return `<section class="ux-screen"${trans} ${dataAttrs}>\n${bodyHtml}\n</section>`;
   }).join("\n");
 
   // bottom nav
   let navHtml = "";
   if (nav.mode === "tabs" || nav.mode === "dock") {
     const items = nav.items.map((it) =>
-      `<button class="ux-tabbar__item" data-goto-tab="${esc(it.screen)}" type="button"><span class="icon">${esc(it.icon || "📄")}</span><span>${esc(it.label || it.screen)}</span>${it.badge ? `<span class="ux-tabbar__badge">${esc(it.badge)}</span>` : ""}</button>`
+      `<button class="ux-tabbar__item" data-goto-tab="${esc(it.screen)}" type="button"><span class="icon">${ico(it.icon, 22) || esc(it.icon || "📄")}</span><span>${esc(it.label || it.screen)}</span>${badgeHtml(it.badge)}</button>`
     ).join("");
     navHtml = `<nav class="ux-tabbar" aria-label="主导航">${items}</nav>`;
   }
@@ -450,7 +581,7 @@ function buildHtml(spec, tokens) {
   let sidebarHtml = "";
   if (device === "desktop" && kind === "app" && (nav.mode === "tabs" || nav.mode === "sidebar")) {
     const items = nav.items.map((it) =>
-      `<button class="ux-sidebar__item" data-goto-tab="${esc(it.screen)}" type="button"><span class="icon">${esc(it.icon || "📄")}</span><span>${esc(it.label || it.screen)}</span></button>`
+      `<button class="ux-sidebar__item" data-goto-tab="${esc(it.screen)}" type="button"><span class="icon">${ico(it.icon, 18) || esc(it.icon || "📄")}</span><span>${esc(it.label || it.screen)}</span></button>`
     ).join("");
     sidebarHtml = `<aside class="ux-sidebar"><div class="ux-sidebar__brand">${esc(title)}</div>${items}</aside>`;
     navHtml = "";
@@ -462,6 +593,7 @@ function buildHtml(spec, tokens) {
 
   // top-of-frame currency etc. for game: inject screens' first chrome blocks stay inside screens.
   // Compose frame: sidebar optional + screens + tabbar + modal + toast
+  const staggerAttr = meta.stagger === true || meta.stagger === "screen" ? " data-stagger" : "";
   const frameInner = `
 ${sidebarHtml}
 <div class="ux-screens">
@@ -490,7 +622,7 @@ ${footnote}
   const navAttr = (deviceAttr === "desktop" && kind === "app" && (nav.mode === "tabs" || nav.mode === "sidebar")) ? "sidebar" : nav.mode;
 
   return `<!DOCTYPE html>
-<html lang="${esc(meta.lang || "zh-CN")}" data-style="${esc(tokens.id)}" data-device="${esc(deviceAttr)}" data-nav="${esc(navAttr)}">
+<html lang="${esc(meta.lang || "zh-CN")}" data-style="${esc(tokens.id)}" data-device="${esc(deviceAttr)}" data-nav="${esc(navAttr)}" data-render="${esc(meta.renderMode === "sketch" ? "sketch" : "hi")}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -507,8 +639,9 @@ ${chromeCss}
 </style>
 </head>
 <body>
+${iconSprite()}
 <div class="ux-stage">
-  <div class="ux-frame" id="ux-app" data-title="${esc(title)}" data-initial="${esc(initial)}" data-demo-hp="${demoHp ? "1" : "0"}" data-demo-toast="${demoToasts ? "1" : "0"}">
+  <div class="ux-frame" id="ux-app" data-title="${esc(title)}" data-initial="${esc(initial)}" data-demo-hp="${demoHp ? "1" : "0"}" data-demo-toast="${demoToasts ? "1" : "0"}" data-render="${esc(meta.renderMode === "sketch" ? "sketch" : "hi")}">
 ${frameInner}
   </div>
 </div>

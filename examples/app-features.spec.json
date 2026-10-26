@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "title": "能力展示 · 动效/状态/图标",
+    "device": "phone",
+    "note": "演示 tween 动画、状态切换、SVG 图标、红点徽标；另附草图模式同款 spec",
+    "stagger": true
+  },
+  "kind": "app",
+  "style": "ios-clean",
+  "nav": {
+    "mode": "tabs",
+    "items": [
+      { "screen": "home", "label": "动态", "icon": "zap", "badge": { "type": "dot", "tone": "danger" } },
+      { "screen": "states", "label": "状态", "icon": "layers", "badge": 3 },
+      { "screen": "icons", "label": "图标", "icon": "grid" },
+      { "screen": "sketch", "label": "草图", "icon": "edit" }
+    ]
+  },
+  "screens": [
+    {
+      "id": "home",
+      "title": "动效",
+      "blocks": [
+        { "type": "stats", "props": { "items": [
+          { "label": "营收", "countTo": 128400, "countPrefix": "¥", "icon": "trending-up", "tone": "primary" },
+          { "label": "订单", "countTo": 326, "icon": "shopping-cart" },
+          { "label": "转化", "value": "4.8%", "icon": "target" }
+        ] } },
+        { "type": "progress", "props": { "label": "上传中", "value": 0.72 } },
+        { "type": "progress", "props": { "label": "同步中", "indeterminate": true } },
+        { "type": "grid", "props": { "cols": 3, "items": [
+          { "icon": "sparkles", "title": "弹跳", "act": "toast", "toast": "anim-bounce" },
+          { "icon": "zap", "title": "抖动", "act": "toast", "toast": "anim-shake" },
+          { "icon": "star", "title": "脉冲", "act": "toast", "toast": "anim-pulse" },
+          { "icon": "heart", "title": "浮动", "act": "toast", "toast": "anim-float" },
+          { "icon": "music", "title": "旋转", "act": "toast", "toast": "anim-spin" },
+          { "icon": "eye", "title": "闪烁", "act": "toast", "toast": "anim-flash" }
+        ] } },
+        { "type": "buttons", "props": { "items": [
+          { "label": "Tween 数字", "variant": "primary", "icon": "trending-up", "act": "toast", "toast": "首页数字已 count-up" },
+          { "label": "触发抖动", "variant": "ghost", "icon": "alert-triangle", "act": "shake" }
+        ] } },
+        { "type": "note", "props": { "text": "进入本页自动播放数字滚动与进度动画；顶部 tab 有呼吸红点。" } }
+      ]
+    },
+    {
+      "id": "states",
+      "title": "状态",
+      "blocks": [
+        { "type": "state-switcher", "props": { "for": "list-host", "states": ["ready", "loading", "empty", "error"], "active": "ready" } },
+        {
+          "type": "state-views",
+          "props": {
+            "for": "list-host",
+            "active": "ready",
+            "views": [
+              {
+                "state": "ready",
+                "blocks": [
+                  { "type": "list", "props": { "items": [
+                    { "icon": "mail", "title": "系统通知", "sub": "2 条未读", "badge": { "type": "dot", "pulse": true } },
+                    { "icon": "bell", "title": "审批提醒", "badge": 5 },
+                    { "icon": "gift", "title": "活动推送", "badge": { "value": "新", "tone": "new" } },
+                    { "icon": "check-circle", "title": "已完成", "trailing": "昨天" }
+                  ] } }
+                ]
+              },
+              { "state": "loading", "blocks": [{ "type": "list", "props": { "state": "loading", "skeletonRows": 4 } }] },
+              { "state": "empty", "blocks": [{ "type": "list", "props": { "state": "empty", "emptyTitle": "还没有消息", "emptyDesc": "有人 @ 你时会出现在这里", "emptyAction": "去逛逛" } }] },
+              { "state": "error", "blocks": [{ "type": "list", "props": { "state": "error", "emptyTitle": "加载失败", "emptyDesc": "请检查网络后重试", "emptyAction": "重新加载" } }] }
+            ]
+          }
+        },
+        { "type": "section", "props": { "title": "禁用示例", "blocks": [
+          { "type": "buttons", "props": { "state": "disabled", "items": [
+            { "label": "不可点的主按钮", "variant": "primary", "act": "toast", "toast": "不应触发" }
+          ] } }
+        ] } },
+        { "type": "note", "props": { "text": "上方切换器可演示 ready / loading / empty / error 四态；红点支持脉冲与数字徽标。" } }
+      ]
+    },
+    {
+      "id": "icons",
+      "title": "图标",
+      "blocks": [
+        { "type": "tabs", "props": { "items": [{ "label": "UI", "active": true }, { "label": "游戏" }, { "label": "商务" }] } },
+        {
+          "type": "grid",
+          "props": {
+            "cols": 4,
+            "items": [
+              { "icon": "home", "title": "home" },
+              { "icon": "search", "title": "search" },
+              { "icon": "settings", "title": "settings" },
+              { "icon": "user", "title": "user" },
+              { "icon": "bell", "title": "bell" },
+              { "icon": "heart", "title": "heart" },
+              { "icon": "star", "title": "star" },
+              { "icon": "shopping-cart", "title": "cart" },
+              { "icon": "sword", "title": "sword" },
+              { "icon": "shield", "title": "shield" },
+              { "icon": "gem", "title": "gem" },
+              { "icon": "trophy", "title": "trophy" },
+              { "icon": "dragon", "title": "dragon" },
+              { "icon": "potion", "title": "potion" },
+              { "icon": "rocket", "title": "rocket" },
+              { "icon": "target", "title": "target" },
+              { "icon": "mail", "title": "mail" },
+              { "icon": "calendar", "title": "calendar" },
+              { "icon": "folder", "title": "folder" },
+              { "icon": "zap", "title": "zap" }
+            ]
+          }
+        },
+        { "type": "list", "props": { "items": [
+          { "icon": "message-circle", "title": "消息", "badge": { "type": "dot", "pulse": true } },
+          { "icon": "user-plus", "title": "新的好友", "badge": 12 },
+          { "icon": "download", "title": "下载中心", "badge": { "value": "…", "tone": "accent" } },
+          { "icon": "alert-circle", "title": "风险提示", "badge": { "value": "!", "tone": "warn" } }
+        ] } },
+        { "type": "note", "props": { "text": "全部为内联 SVG sprite（stroke 风格），icon 名见 styles/SCHEMA.md；未知名自动回退 emoji。" } }
+      ]
+    },
+    {
+      "id": "sketch",
+      "title": "草图模式",
+      "transition": "fade",
+      "blocks": [
+        { "type": "hero", "props": { "title": "同一份 spec", "sub": "meta.renderMode = sketch", "motif": "pencil", "cta": { "label": "看另一套风格草图", "toast": "把 style 换成任意包 + renderMode=sketch 即可" } } },
+        { "type": "list", "props": { "items": [
+          { "icon": "file", "title": "低保真线框", "sub": "灰度 + 虚线边框 + 斜纹占位" },
+          { "icon": "eye", "title": "保留结构与信息层级", "sub": "适合评审早期对齐" },
+          { "icon": "edit", "title": "右上角 SKETCH 水印", "sub": "避免和高保真稿混淆" }
+        ] } },
+        { "type": "buttons", "props": { "items": [
+          { "label": "本页已是草图渲染", "variant": "primary", "act": "toast", "toast": "sketch mode" },
+          { "label": "返回动态页", "variant": "ghost", "to": "home" }
+        ] } }
+      ]
+    }
+  ]
+}

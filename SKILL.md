@@ -9,7 +9,7 @@ description: |
   按参考图还原风格的网页原型 / game UI prototype / app UI prototype.
 description_zh: "文字描述+风格参考图 → 可交互 UX 原型 HTML（自动区分游戏/应用，可嵌飞书）"
 description_en: "Text + style refs → interactive UX prototype HTML (game/app aware, Feishu-embeddable)"
-version: 1.0.0
+version: 1.1.0
 license: MIT
 metadata:
   category: ux-prototype
@@ -23,6 +23,9 @@ metadata:
 
 - 自动区分 **游戏 UI** 还是 **应用 UI**
 - 内置风格包：游戏 8 套 + 应用 6 套，支持自定义扩展
+- **内联 SVG 图标库**、**红点/数字徽标**、**骨架/空态/错误态**、**Tween 动画引擎**
+- **草图模式**（`meta.renderMode="sketch"`）：同一份 spec 输出低保真线框，给策划早期对齐
+- 屏幕切换 transition：slide / fade / zoom / flip
 - 单文件、零外链、`file://` 可开，**可嵌入飞书文档**做策划交互原型
 - 由 `scripts/build.mjs` 确定性构建 —— 比手写 HTML 稳定一个数量级
 
@@ -125,6 +128,24 @@ node scripts/validate.mjs <name>.html
         或托管为 https URL 后用「嵌入网页」（见 workflows/05-feishu.md）
 - 演示点：主城 → 出征 → 战斗技能；底部 Dock 切换背包/排行
 ```
+
+## 能力速查（v1.1）
+
+| 需求 | 怎么写 |
+|---|---|
+| 图标 | `icon: "sword"`（名见 SCHEMA；未知名回退 emoji） |
+| 红点 | `badge: "pulse"` 或 `badge: { type:"dot", tone:"danger" }` |
+| 数字徽标 | `badge: 5` / `badge: { value:"新", tone:"new" }` |
+| 加载态 | block 上 `props.state: "loading"` |
+| 空/错态 | `state: "empty"|"error"` + emptyTitle/emptyAction |
+| 禁用 | `state: "disabled"` |
+| 状态演示 | `state-switcher` + `state-views`（同 `for` id） |
+| 数字滚动 | stats 项 `countTo: 128400, countPrefix: "¥"` |
+| 入场动画 | block `anim: "fade-up"` 或 `meta.stagger: true` |
+| 加载条纹 | progress `indeterminate: true` |
+| 草图稿 | `meta.renderMode: "sketch"` |
+| 屏切换 | screen `transition: "zoom"` |
+| 运行时 tween | 页面内 `UXTween.to / UXTween.count`（见 SCHEMA） |
 
 ## 风格包一览
 
