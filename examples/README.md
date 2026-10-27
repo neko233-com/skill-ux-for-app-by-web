@@ -1,26 +1,18 @@
-# 示例
+﻿# 示例
 
-| 文件 | 说明 |
-|---|---|
-| `game-anime.spec.json` | 游戏示例 spec（二次元，4 屏） |
-| `game-genres.spec.json` | 玩法综合：头顶道具 + SLG + 卡牌 + 打牌 + 自走棋，默认竖屏可切横屏 |
-| `app-ios-clean.spec.json` | 应用示例 spec（苹果极简，3 屏） |
-| `app-features.spec.json` | 能力展示：动效 / 状态切换 / 图标 / 红点 |
-| `app-features.sketch.spec.json` | 同上 + `renderMode: sketch` 草图模式 |
-| `demo-game-anime.html` | 游戏产物 |
-| `demo-game-genres.html` | 四种玩法与动画的可点击综合产物 |
-| `demo-app-ios.html` | 应用产物 |
-| `demo-app-features.html` | 能力展示产物 |
-| `demo-app-sketch.html` | 草图模式产物 |
-| `demo-game-custom.html` | 自定义风格包 `neko-crimson` 扩展演示 |
+| spec | 产物 | 说明 |
+|---|---|---|
+| `game-anime.spec.json` | `demo-game-anime.html` | 游戏主城（二次元，4 屏，道具栏弹窗） |
+| `game-custom-neko.spec.json` | `demo-game-custom.html` | 自定义风格包 `neko-crimson` |
+| `game-genres.spec.json` | `demo-game-genres.html` | 玩法矩阵（SLG/卡牌/自走棋/扑克） |
+| `app-ios-clean.spec.json` | `demo-app-ios.html` | 应用工作台（苹果极简，3 屏） |
+| `app-features.spec.json` | `demo-app-features.html` | 动效/状态/图标/红点 |
+| `app-features.sketch.spec.json` | `demo-app-sketch.html` | 草图模式（默认） |
 
 重新生成：
 
 ```bash
 node scripts/build.mjs --spec examples/game-anime.spec.json --out examples/demo-game-anime.html
-node scripts/build.mjs --spec examples/game-genres.spec.json --out examples/demo-game-genres.html
-node scripts/build.mjs --spec examples/app-features.spec.json --out examples/demo-app-features.html
-node scripts/build.mjs --spec examples/app-features.sketch.spec.json --out examples/demo-app-sketch.html
 ```
 
 浏览器直接打开 `.html` 即可点击体验。

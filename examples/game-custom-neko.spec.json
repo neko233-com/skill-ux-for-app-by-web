@@ -1,0 +1,412 @@
+{
+  "meta": {
+    "title": "自定义风格",
+    "device": "phone",
+    "renderMode": "hi"
+  },
+  "kind": "game",
+  "style": "neko-crimson",
+  "demo": {
+    "hpDrain": true,
+    "toasts": true
+  },
+  "nav": {
+    "mode": "dock",
+    "items": [
+      {
+        "screen": "home",
+        "label": "主城",
+        "icon": "castle"
+      },
+      {
+        "screen": "battle",
+        "label": "冒险",
+        "icon": "swords"
+      },
+      {
+        "screen": "bag",
+        "label": "背包",
+        "icon": "backpack"
+      },
+      {
+        "screen": "rank",
+        "label": "排行",
+        "icon": "trophy"
+      }
+    ]
+  },
+  "screens": [
+    {
+      "id": "home",
+      "title": "主城",
+      "blocks": [
+        {
+          "type": "currency",
+          "props": {
+            "items": [
+              {
+                "icon": "coin",
+                "label": "金币",
+                "value": "12.4K",
+                "detail": {
+                  "title": "金币",
+                  "desc": "通用货币",
+                  "lines": [
+                    "副本掉落",
+                    "出售装备"
+                  ],
+                  "ok": "去获取",
+                  "icon": "coin"
+                }
+              },
+              {
+                "icon": "gem",
+                "label": "钻石",
+                "value": "860",
+                "detail": {
+                  "title": "钻石",
+                  "desc": "稀有货币",
+                  "rewards": [
+                    {
+                      "label": "首充双倍"
+                    },
+                    {
+                      "label": "月卡每日"
+                    }
+                  ],
+                  "ok": "去充值",
+                  "icon": "gem"
+                }
+              },
+              {
+                "icon": "zap",
+                "label": "体力",
+                "value": "88/100",
+                "plus": false,
+                "detail": {
+                  "title": "体力",
+                  "desc": "每 5 分钟回复 1 点",
+                  "icon": "zap",
+                  "ok": "知道了"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "player-bar",
+          "props": {
+            "name": "旅人",
+            "level": 28,
+            "exp": 0.62,
+            "avatar": "user"
+          }
+        },
+        {
+          "type": "gacha-banner",
+          "props": {
+            "title": "限定祈愿 · 星穹",
+            "sub": "保底 42/80",
+            "cta": "前往祈愿",
+            "to": "battle",
+            "motif": "sparkles"
+          }
+        },
+        {
+          "type": "grid",
+          "props": {
+            "cols": 3,
+            "items": [
+              {
+                "icon": "swords",
+                "title": "出征",
+                "to": "battle"
+              },
+              {
+                "icon": "map",
+                "title": "探索",
+                "detail": {
+                  "title": "探索",
+                  "desc": "主线 12-3 解锁中",
+                  "icon": "map",
+                  "ok": "知道了"
+                }
+              },
+              {
+                "icon": "shopping-cart",
+                "title": "商店",
+                "detail": {
+                  "title": "商店",
+                  "desc": "每日刷新 3 件折扣",
+                  "icon": "shopping-cart",
+                  "ok": "去看看"
+                }
+              },
+              {
+                "icon": "users",
+                "title": "公会",
+                "detail": {
+                  "title": "公会",
+                  "desc": "今日签到 +20 贡献",
+                  "icon": "users"
+                }
+              },
+              {
+                "icon": "clipboard",
+                "title": "任务",
+                "detail": {
+                  "title": "任务",
+                  "desc": "日常 3/5 · 周常 1/3",
+                  "icon": "clipboard"
+                }
+              },
+              {
+                "icon": "settings",
+                "title": "设置",
+                "detail": {
+                  "title": "设置",
+                  "desc": "音效 / 画质 / 账号",
+                  "icon": "settings"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "battle",
+      "title": "战斗",
+      "blocks": [
+        {
+          "type": "hp-bar",
+          "props": {
+            "name": "幼龙 · Lv.15",
+            "hp": 100,
+            "max": 100
+          }
+        },
+        {
+          "type": "hp-bar",
+          "props": {
+            "name": "旅人",
+            "hp": 86,
+            "max": 100,
+            "side": "left"
+          }
+        },
+        {
+          "type": "hero",
+          "props": {
+            "title": "回合演示",
+            "sub": "点技能查看反馈",
+            "motif": "dragon"
+          }
+        },
+        {
+          "type": "skill-bar",
+          "props": {
+            "items": [
+              {
+                "icon": "zap",
+                "name": "炎刃",
+                "cost": "12",
+                "cd": 3
+              },
+              {
+                "icon": "droplet",
+                "name": "冰封",
+                "cost": "18"
+              },
+              {
+                "icon": "sparkles",
+                "name": "奥义",
+                "cost": "40"
+              },
+              {
+                "icon": "shield",
+                "name": "防御",
+                "cost": "0"
+              }
+            ]
+          }
+        },
+        {
+          "type": "joystick-hint"
+        },
+        {
+          "type": "buttons",
+          "props": {
+            "items": [
+              {
+                "label": "自动",
+                "variant": "primary",
+                "icon": "play",
+                "act": "toast",
+                "toast": "自动战斗"
+              },
+              {
+                "label": "返回",
+                "variant": "ghost",
+                "icon": "arrow-left",
+                "to": "home"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bag",
+      "title": "背包",
+      "blocks": [
+        {
+          "type": "tabs",
+          "props": {
+            "items": [
+              {
+                "label": "全部",
+                "active": true
+              },
+              {
+                "label": "装备"
+              },
+              {
+                "label": "材料"
+              }
+            ]
+          }
+        },
+        {
+          "type": "inventory",
+          "props": {
+            "items": [
+              {
+                "icon": "sword",
+                "name": "苍穹之刃",
+                "qty": 1,
+                "rarity": "legend",
+                "desc": "攻击 +128 · 暴击 12%",
+                "detail": {
+                  "title": "苍穹之刃",
+                  "desc": "攻击 +128 · 暴击 12%",
+                  "rewards": [
+                    "强化",
+                    "穿戴"
+                  ],
+                  "ok": "穿戴",
+                  "icon": "sword"
+                }
+              },
+              {
+                "icon": "shield",
+                "name": "星辉盾",
+                "qty": 1,
+                "rarity": "epic",
+                "desc": "防御 +64"
+              },
+              {
+                "icon": "flask",
+                "name": "治疗药水",
+                "qty": 24,
+                "rarity": "common",
+                "desc": "回复 30% HP"
+              },
+              {
+                "icon": "gem",
+                "name": "强化石",
+                "qty": 6,
+                "rarity": "rare",
+                "desc": "装备强化材料"
+              },
+              {
+                "icon": "book",
+                "name": "技能书",
+                "qty": 1,
+                "rarity": "epic",
+                "desc": "随机技能升级"
+              },
+              {
+                "icon": "coffee",
+                "name": "烤肉",
+                "qty": 12,
+                "rarity": "common",
+                "desc": "体力 +20"
+              },
+              {
+                "icon": "unlock",
+                "name": "秘境钥匙",
+                "qty": 2,
+                "rarity": "rare",
+                "desc": "开启限时秘境"
+              },
+              {
+                "icon": "gift",
+                "name": "头像框",
+                "qty": 1,
+                "rarity": "epic",
+                "desc": "限定装扮"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "rank",
+      "title": "排行榜",
+      "blocks": [
+        {
+          "type": "tabs",
+          "props": {
+            "items": [
+              {
+                "label": "战力",
+                "active": true
+              },
+              {
+                "label": "公会"
+              },
+              {
+                "label": "本周"
+              }
+            ]
+          }
+        },
+        {
+          "type": "leaderboard",
+          "props": {
+            "items": [
+              {
+                "rank": 1,
+                "name": "夜翼",
+                "score": "98,420"
+              },
+              {
+                "rank": 2,
+                "name": "青雀",
+                "score": "95,110"
+              },
+              {
+                "rank": 3,
+                "name": "Kuro",
+                "score": "91,003"
+              },
+              {
+                "rank": 4,
+                "name": "旅人",
+                "score": "88,250",
+                "me": true
+              },
+              {
+                "rank": 5,
+                "name": "阿茶",
+                "score": "86,001"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

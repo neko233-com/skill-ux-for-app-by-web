@@ -322,7 +322,19 @@
     bodyEl.style.whiteSpace = body && body.indexOf("\n") >= 0 ? "pre-line" : "";
     var iconEl = $(".ux-modal__icon", modalEl);
     if (iconEl) {
-      if (iconName) { iconEl.textContent = iconName; iconEl.hidden = false; }
+      if (iconName) { iconEl.innerHTML = "";
+        if (doc.getElementById("uxi-" + iconName)) {
+          var svg = doc.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svg.setAttribute("class", "ux-icon");
+          svg.setAttribute("width", "22");
+          svg.setAttribute("height", "22");
+          var use = doc.createElementNS("http://www.w3.org/2000/svg", "use");
+          use.setAttribute("href", "#uxi-" + iconName);
+          svg.appendChild(use);
+          iconEl.appendChild(svg);
+        } else {
+          iconEl.textContent = iconName;
+        } iconEl.hidden = false; }
       else { iconEl.hidden = true; iconEl.textContent = ""; }
     }
     var okBtn = $("[data-modal-ok]", modalEl);

@@ -1,4 +1,4 @@
-# skill-ux-for-app-by-web
+﻿# skill-ux-for-app-by-web
 
 > **文字描述 + 历史风格参考图 → 可交互 UX 原型 HTML**  
 > 自动区分 **游戏 / 应用** · 内置 14 套风格包 · 可扩展 · 可嵌入**飞书文档**
@@ -42,6 +42,17 @@ node scripts/validate.mjs examples/demo-game-genres.html
 **应用**：苹果极简 · 谷歌质感 · 玻璃拟态 · 新粗野主义 · 商务后台 · 极简墨水  
 
 详见 [`styles/catalog.md`](styles/catalog.md)。复制 `styles/_template.tokens.json` 到 `styles/custom/` 即可扩展。
+
+## 能力速览
+
+- **交互**：跳转 / Toast / 弹窗（`detail`，道具栏·背包·入口可点）
+- **动效**：内置 Tween 引擎 + 16 种动画 + 入场 stagger
+- **状态**：loading 骨架 / empty / error / disabled + 状态演示切换器
+- **图标**：内联 SVG sprite（138 图标），未知名回退 emoji
+- **红点**：脉冲 / 数字徽标，支持 tone 色
+- **玩法**（游戏）：SLG 地图 / 卡牌对战 / 自走棋 / 扑克 / 头顶道具栏 / 回合条
+- **草图模式**：默认出低保真线框（`renderMode`），高保真显式 `hi`
+- **飞书**：单文件零外链，附件 / 嵌入网页两用
 
 ## 工作流
 

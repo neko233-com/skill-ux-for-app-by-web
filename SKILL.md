@@ -1,4 +1,4 @@
----
+﻿---
 name: skill-ux-for-app-by-web
 description: |
   Generate interactive UX prototype HTML from a text brief, optionally guided by
@@ -11,7 +11,7 @@ description: |
   按参考图还原风格的网页原型 / game UI prototype / app UI prototype.
 description_zh: "文字描述+风格参考图 → 可交互 UX 原型 HTML（自动区分游戏/应用，可嵌飞书）"
 description_en: "Text + style refs → interactive UX prototype HTML (game/app aware, Feishu-embeddable)"
-version: 1.2.0
+version: 1.2.1
 license: MIT
 metadata:
   category: ux-prototype
