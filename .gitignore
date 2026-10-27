@@ -8,3 +8,4 @@ tests/screenshots/
 Thumbs.db
 .tmp/
 .cache/
+.codely-cli/
