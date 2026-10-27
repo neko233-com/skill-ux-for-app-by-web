@@ -11,7 +11,7 @@ description: |
   按参考图还原风格的网页原型 / game UI prototype / app UI prototype.
 description_zh: "文字描述+风格参考图 → 可交互 UX 原型 HTML（自动区分游戏/应用，可嵌飞书）"
 description_en: "Text + style refs → interactive UX prototype HTML (game/app aware, Feishu-embeddable)"
-version: 1.2.1
+version: 1.2.2
 license: MIT
 metadata:
   category: ux-prototype
@@ -115,11 +115,13 @@ Schema 权威文件：`styles/SCHEMA.md`。
 
 Block 全表、导航、demo 开关都在 SCHEMA.md。
 
-### 5. 构建 + 校验
+### 5. 构建 + 校验 + 全链路验证
 
 ```bash
 node scripts/build.mjs --spec <spec.json> --out <name>.html
 node scripts/validate.mjs <name>.html
+node tests/verify-all.mjs    # 可选：全链路 19 项（含边界用例）
+node tests/edge-cases.mjs    # 可选：构建器边界
 ```
 
 校验 FAIL → 改 spec 重建；**禁止**直接在产物 HTML 上修。

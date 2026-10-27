@@ -4,6 +4,7 @@
 
 ```bash
 node tests/verify-all.mjs
+node tests/edge-cases.mjs   # 构建器边界用例
 ```
 
 覆盖：5 个示例 spec 构建+校验 · 6 个 demo 校验 · 14 风格矩阵 · 自定义风格 ·

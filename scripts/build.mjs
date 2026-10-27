@@ -44,7 +44,7 @@ Options:
 const QUIET = !!args.quiet;
 
 /* ── 工具 ─────────────────────────────────────── */
-const read = (p) => readFileSync(p, "utf8");
+const read = (p) => readFileSync(p, "utf8").replace(/^\uFEFF/, "");
 function deepMerge(base, over) {
   if (over == null) return base;
   if (Array.isArray(base) || Array.isArray(over)) return over;
@@ -846,11 +846,11 @@ function main() {
     if (!EXAMPLES[key]) throw new Error(`--example 必须是 game|app`);
     spec = EXAMPLES[key];
   } else if (args["spec-json"]) {
-    spec = JSON.parse(args["spec-json"]);
+    try { spec = JSON.parse(String(args["spec-json"]).replace(/^\uFEFF/, "")); } catch (e) { throw new Error("spec-json 解析失败: " + (e.message || e)); }
   } else {
     const p = resolve(args.spec);
     if (!existsSync(p)) throw new Error(`spec 不存在: ${p}`);
-    spec = JSON.parse(read(p));
+    try { spec = JSON.parse(read(p)); } catch (e) { throw new Error("spec JSON 解析失败: " + (e.message || e)); }
   }
 
   if (!spec.kind) throw new Error("spec.kind 必填: game | app");

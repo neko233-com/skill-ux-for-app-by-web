@@ -28,6 +28,12 @@
 
 不要手写整页 HTML 除非 build 脚本不可用；脚本产出比手写稳定一个数量级。
 
+要点：
+- 默认出**草图**（`meta.renderMode` 省略即 sketch）；高保真才写 `"hi"`
+- 可点元素优先 `detail` 弹窗（道具栏 / 背包 / 入口），而不是 toast 一句话
+- 文案克制：默认不写 `note`，界面上禁止罗列功能说明
+- 交付前跑 `node tests/verify-all.mjs`（19 项）
+
 ## 目录
 
 - `SKILL.md` — 完整工作流（权威）
