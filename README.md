@@ -1,4 +1,4 @@
-﻿# skill-ux-for-app-by-web
+# skill-ux-for-app-by-web
 
 > **文字描述 + 历史风格参考图 → 可交互 UX 原型 HTML**  
 > 自动区分 **游戏 / 应用** · 内置 14 套风格包 · 可扩展 · 可嵌入**飞书文档**

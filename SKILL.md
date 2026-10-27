@@ -1,4 +1,4 @@
-﻿---
+---
 name: skill-ux-for-app-by-web
 description: |
   Generate interactive UX prototype HTML from a text brief, optionally guided by
