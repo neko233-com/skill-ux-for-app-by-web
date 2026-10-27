@@ -831,7 +831,12 @@ a { color: var(--ux-primary); text-decoration: none; }
 
 /* reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  *, *::before, *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════
@@ -1254,3 +1259,26 @@ a { color: var(--ux-primary); text-decoration: none; }
 .ux-state-host { position: relative; }
 .ux-state-host > .ux-state-view { display: none; }
 .ux-state-host > .ux-state-view.is-shown { display: block; }
+
+/* ── v1.2: 安静注释 / 弹窗图标 / 道具栏 ──────── */
+.ux-note {
+  font-size: 10px; line-height: 1.5;
+  color: var(--ux-ink-3);
+  background: transparent; border: none;
+  border-left: 2px solid var(--ux-line);
+  border-radius: 0; padding: 2px 0 2px 8px;
+  margin-bottom: 12px;
+}
+.ux-note strong { font-weight: 500; color: var(--ux-ink-3); }
+.ux-empty__desc:empty { display: none; }
+.ux-modal__head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.ux-modal__icon {
+  width: 40px; height: 40px; border-radius: var(--ux-r-md);
+  background: var(--ux-surface-2); display: grid; place-items: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.ux-modal__title { margin: 0; flex: 1; }
+.ux-currency__item { cursor: pointer; transition: transform var(--ux-dur-fast) var(--ux-ease); }
+.ux-currency__item:active { transform: scale(0.96); }
+.ux-inv__slot { cursor: pointer; }
+[data-render="sketch"] .ux-note { border-left-color: #C8C2B8; color: #8A8580; }

@@ -1,0 +1,268 @@
+{
+  "meta": {
+    "title": "小游戏玩法实验室",
+    "device": "phone",
+    "lang": "zh-CN",
+    "note": "默认竖屏；点击横/竖屏按钮可预览双方向布局",
+    "stagger": false
+  },
+  "kind": "game",
+  "game": { "genre": "collection" },
+  "style": "supercell",
+  "demo": { "toasts": true, "hpDrain": false },
+  "nav": {
+    "mode": "dock",
+    "items": [
+      { "screen": "home", "label": "主页", "icon": "home" },
+      { "screen": "slg", "label": "SLG", "icon": "map" },
+      { "screen": "card", "label": "卡牌", "icon": "layers" },
+      { "screen": "poker", "label": "打牌", "icon": "grid" },
+      { "screen": "tactics", "label": "自走棋", "icon": "crown" }
+    ]
+  },
+  "screens": [
+    {
+      "id": "home",
+      "title": "玩法实验室",
+      "blocks": [
+        {
+          "type": "currency",
+          "props": {
+            "items": [
+              { "icon": "coin", "label": "金币", "value": "1,280", "plus": false },
+              { "icon": "gem", "label": "钻石", "value": "86", "plus": false }
+            ]
+          }
+        },
+        {
+          "type": "overhead-bar",
+          "props": {
+            "id": "hero",
+            "name": "团长阿星",
+            "level": 12,
+            "avatar": "🧙",
+            "hp": 40,
+            "maxHp": 60,
+            "statuses": [
+              { "icon": "shield", "label": "护盾", "tone": "ok" },
+              { "icon": "zap", "label": "迅捷", "tone": "accent" }
+            ],
+            "items": [
+              { "icon": "🧪", "name": "治疗药水", "qty": 2, "effect": "heal", "value": 15 },
+              { "icon": "🛡️", "name": "守护卷轴", "qty": 1, "effect": "shield", "value": 8 },
+              { "icon": "🔥", "name": "狂暴符文", "qty": 3, "effect": "buff", "value": 2 }
+            ]
+          }
+        },
+        {
+          "type": "grid",
+          "props": {
+            "cols": 2,
+            "items": [
+              { "icon": "map", "title": "SLG 战略地图", "sub": "侦察 / 行军 / 进攻", "to": "slg" },
+              { "icon": "layers", "title": "卡牌战斗", "sub": "费用 / 目标 / 抽牌", "to": "card" },
+              { "icon": "grid", "title": "打牌牌桌", "sub": "多选 / 提示 / 理牌", "to": "poker" },
+              { "icon": "crown", "title": "自走棋", "sub": "购买 / 站位 / 升星", "to": "tactics" }
+            ]
+          }
+        },
+        {
+          "type": "buttons",
+          "props": {
+            "items": [
+              { "label": "切换横/竖屏", "icon": "smartphone", "act": "orientation", "block": true }
+            ]
+          }
+        },
+        {
+          "type": "note",
+          "props": { "text": "点击头顶道具可使用并扣减数量；四种玩法均有独立状态与操作反馈，不是静态界面。" }
+        }
+      ]
+    },
+    {
+      "id": "slg",
+      "title": "SLG · 边境战争",
+      "blocks": [
+        {
+          "type": "turn-bar",
+          "props": {
+            "items": [
+              { "icon": "flag", "label": "势力", "value": "银月同盟", "key": "faction" },
+              { "icon": "swords", "label": "行动力", "value": "3/3", "key": "ap" },
+              { "icon": "clock", "label": "赛季", "value": "12天", "key": "season" }
+            ]
+          }
+        },
+        {
+          "type": "slg-map",
+          "props": {
+            "cols": 5,
+            "rows": 3,
+            "hint": "推荐：选择「边境营地」→ 进攻 → 选择相邻「赤岩哨站」。",
+            "cells": [
+              { "label": "银月城", "terrain": "city", "owner": "player", "power": 10, "icon": "🏰" },
+              { "label": "边境营地", "terrain": "plain", "owner": "player", "power": 6, "icon": "⛺" },
+              { "label": "赤岩哨站", "terrain": "city", "owner": "enemy", "power": 4, "icon": "🗼" },
+              { "label": "荒原", "terrain": "plain", "owner": "neutral", "power": 2 },
+              { "label": "山脉", "terrain": "mountain", "owner": "neutral", "power": 0 },
+              { "label": "林地", "terrain": "plain", "owner": "neutral", "power": 1, "icon": "🌲" },
+              { "label": "丰收村", "terrain": "city", "owner": "neutral", "power": 1, "icon": "🌾" },
+              { "label": "黑旗军", "terrain": "plain", "owner": "enemy", "power": 5, "icon": "⚔️" },
+              { "label": "浅滩", "terrain": "plain", "owner": "neutral", "power": 0, "icon": "🏝️" },
+              { "label": "河流", "terrain": "water", "owner": "neutral", "power": 0 },
+              { "label": "北境", "terrain": "plain", "owner": "neutral", "power": 2, "icon": "❄️" },
+              { "label": "古道", "terrain": "plain", "owner": "neutral", "power": 0, "icon": "🛤️" },
+              { "label": "前哨", "terrain": "city", "owner": "enemy", "power": 3, "icon": "🏯" },
+              { "label": "矿区", "terrain": "plain", "owner": "neutral", "power": 1, "icon": "⛏️" },
+              { "label": "湖泊", "terrain": "water", "owner": "neutral", "power": 0 }
+            ]
+          }
+        },
+        {
+          "type": "buttons",
+          "props": { "items": [{ "label": "切换横/竖屏", "icon": "smartphone", "act": "orientation", "block": true }] }
+        }
+      ]
+    },
+    {
+      "id": "card",
+      "title": "卡牌 · 星焰试炼",
+      "blocks": [
+        {
+          "type": "card-battle",
+          "props": {
+            "energy": 3,
+            "maxEnergy": 3,
+            "maxHand": 7,
+            "hint": "点选卡牌与敌人，再打出；结束回合会结算敌方攻击、恢复能量并抽牌。",
+            "player": { "id": "player", "name": "星焰术士", "icon": "🧙", "hp": 30, "maxHp": 30, "attack": 0 },
+            "enemies": [
+              {
+                "id": "golem",
+                "name": "熔岩魔像",
+                "icon": "🗿",
+                "hp": 18,
+                "maxHp": 18,
+                "attack": 3,
+                "statuses": [{ "icon": "🔥", "label": "燃烧", "tone": "danger" }],
+                "items": [{ "icon": "💎", "name": "熔岩核心", "qty": 1 }]
+              },
+              { "id": "void", "name": "虚空侍从", "icon": "👻", "hp": 12, "maxHp": 12, "attack": 2 }
+            ],
+            "hand": [
+              { "id": "fireball", "name": "火球术", "icon": "🔥", "cost": 2, "damage": 6, "target": "enemy", "rarity": "rare", "type": "法术", "desc": "对选中敌人造成 6 点伤害" },
+              { "id": "missile", "name": "奥术飞弹", "icon": "✨", "cost": 1, "damage": 3, "target": "enemy", "type": "法术", "desc": "造成 3 点伤害" },
+              { "id": "heal", "name": "生命回响", "icon": "💚", "cost": 1, "heal": 5, "target": "self", "type": "恢复", "desc": "恢复 5 点生命" },
+              { "id": "shield", "name": "星辉护盾", "icon": "🛡️", "cost": 1, "block": 4, "target": "self", "rarity": "epic", "type": "防御", "desc": "获得 4 点护盾" },
+              { "id": "meteor", "name": "陨石坠落", "icon": "☄️", "cost": 3, "damage": 4, "target": "all", "rarity": "legend", "type": "奥义", "desc": "对所有敌人造成 4 点伤害" }
+            ],
+            "deck": [
+              { "id": "spark", "name": "火花", "icon": "⚡", "cost": 1, "damage": 2, "target": "enemy", "desc": "造成 2 点伤害" },
+              { "id": "frost", "name": "寒霜冲击", "icon": "❄️", "cost": 2, "damage": 5, "target": "enemy", "rarity": "rare", "desc": "造成 5 点伤害" },
+              { "id": "renew", "name": "复苏", "icon": "🌿", "cost": 1, "heal": 4, "target": "self", "desc": "恢复 4 点生命" }
+            ]
+          }
+        },
+        {
+          "type": "buttons",
+          "props": { "items": [{ "label": "切换横/竖屏", "icon": "smartphone", "act": "orientation", "block": true }] }
+        }
+      ]
+    },
+    {
+      "id": "poker",
+      "title": "打牌 · 对子练习局",
+      "blocks": [
+        {
+          "type": "poker-table",
+          "props": {
+            "rule": "pair",
+            "hint": "本局演示对子规则：点击「提示」选中两张 8，再点击「出牌」；也可理牌或不出。",
+            "opponents": [
+              { "name": "北风", "icon": "🦊", "cardCount": 7 },
+              { "name": "南风", "icon": "🐼", "cardCount": 6 }
+            ],
+            "hand": [
+              { "suit": "spades", "rank": "8" },
+              { "suit": "hearts", "rank": "8" },
+              { "suit": "clubs", "rank": "A" },
+              { "suit": "diamonds", "rank": "K" },
+              { "suit": "spades", "rank": "Q" },
+              { "suit": "hearts", "rank": "10" },
+              { "suit": "clubs", "rank": "7" },
+              { "suit": "diamonds", "rank": "3" }
+            ]
+          }
+        },
+        {
+          "type": "buttons",
+          "props": { "items": [{ "label": "切换横/竖屏", "icon": "smartphone", "act": "orientation", "block": true }] }
+        }
+      ]
+    },
+    {
+      "id": "tactics",
+      "title": "自走棋 · 星岛棋局",
+      "blocks": [
+        {
+          "type": "auto-chess",
+          "props": {
+            "cols": 6,
+            "rows": 4,
+            "gold": 10,
+            "level": 3,
+            "xp": 4,
+            "xpNext": 8,
+            "cap": 3,
+            "enemyPower": 8,
+            "refreshCost": 2,
+            "xpCost": 4,
+            "benchSize": 6,
+            "hint": "商店首个「芽灵」可与备战席两个同名棋子合成二星；点棋子再点空格可调站位。",
+            "synergies": [
+              { "trait": "守卫", "name": "守卫", "need": 2 },
+              { "trait": "元素", "name": "元素", "need": 2 }
+            ],
+            "slots": [
+              { "id": "enemy-a", "name": "暗影兵", "icon": "🥷", "team": "enemy", "hp": 20, "attack": 2, "trait": "暗影" },
+              { "id": "enemy-b", "name": "暗影弓手", "icon": "🏹", "team": "enemy", "hp": 16, "attack": 2, "trait": "暗影" },
+              null, null, null, null,
+              null, null, null, null, null, null,
+              null, null, null, null, null, null,
+              {
+                "id": "guard",
+                "name": "盾卫",
+                "icon": "🛡️",
+                "hp": 32,
+                "attack": 2,
+                "cost": 2,
+                "trait": "守卫",
+                "statuses": [{ "icon": "🛡️", "label": "护盾", "tone": "ok" }],
+                "items": [{ "icon": "🗡️", "name": "长剑", "qty": 1 }]
+              },
+              { "id": "guard", "name": "盾卫", "icon": "🛡️", "hp": 32, "attack": 2, "cost": 2, "trait": "守卫" },
+              { "id": "mage", "name": "焰灵", "icon": "🔥", "hp": 20, "attack": 4, "cost": 3, "trait": "元素" },
+              null, null, null
+            ],
+            "bench": [
+              { "id": "sprout", "name": "芽灵", "icon": "🌱", "hp": 16, "attack": 1, "cost": 1, "trait": "元素" },
+              { "id": "sprout", "name": "芽灵", "icon": "🌱", "hp": 16, "attack": 1, "cost": 1, "trait": "元素" },
+              null, null, null, null
+            ],
+            "shop": [
+              { "id": "sprout", "name": "芽灵", "icon": "🌱", "hp": 16, "attack": 1, "cost": 1, "trait": "元素" },
+              { "id": "guard", "name": "盾卫", "icon": "🛡️", "hp": 32, "attack": 2, "cost": 2, "trait": "守卫" },
+              { "id": "mage", "name": "焰灵", "icon": "🔥", "hp": 20, "attack": 4, "cost": 3, "trait": "元素" },
+              { "id": "rogue", "name": "影刃", "icon": "🗡️", "hp": 18, "attack": 5, "cost": 4, "trait": "暗影" }
+            ]
+          }
+        },
+        {
+          "type": "buttons",
+          "props": { "items": [{ "label": "切换横/竖屏", "icon": "smartphone", "act": "orientation", "block": true }] }
+        }
+      ]
+    }
+  ]
+}

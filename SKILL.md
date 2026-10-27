@@ -5,11 +5,13 @@ description: |
   historical style reference images. Auto-detects game vs app UI, applies built-in
   style packs (8 game styles + 6 app styles, extensible), and emits a single
   self-contained HTML file that works offline and embeds into Feishu docs.
+  Gameplay-first blocks cover SLG, card battles, poker and auto-chess, with
+  overhead items, combat animation and portrait/landscape layouts (portrait first).
   Use when: 交互原型 / UX 原型 / 可点击 demo / 策划交互稿 / 高保真界面演示 /
   按参考图还原风格的网页原型 / game UI prototype / app UI prototype.
 description_zh: "文字描述+风格参考图 → 可交互 UX 原型 HTML（自动区分游戏/应用，可嵌飞书）"
 description_en: "Text + style refs → interactive UX prototype HTML (game/app aware, Feishu-embeddable)"
-version: 1.1.0
+version: 1.2.0
 license: MIT
 metadata:
   category: ux-prototype
@@ -24,6 +26,9 @@ metadata:
 - 自动区分 **游戏 UI** 还是 **应用 UI**
 - 内置风格包：游戏 8 套 + 应用 6 套，支持自定义扩展
 - **内联 SVG 图标库**、**红点/数字徽标**、**骨架/空态/错误态**、**Tween 动画引擎**
+- **玩法优先**：SLG 地图、卡牌战斗、打牌、自走棋均有真实可选中/结算状态
+- **单位头顶状态/道具栏**、伤害跳字、发牌/受击/上阵/升星动画，支持 reduced-motion
+- **游戏默认竖屏**，支持显式横屏与跟随设备；横屏重排 Dock、棋盘与操作面板
 - **草图模式**（`meta.renderMode="sketch"`）：同一份 spec 输出低保真线框，给策划早期对齐
 - 屏幕切换 transition：slide / fade / zoom / flip
 - 单文件、零外链、`file://` 可开，**可嵌入飞书文档**做策划交互原型
@@ -40,6 +45,10 @@ metadata:
 
 ## 铁律
 
+0. **默认出草图**。`meta.renderMode` 省略即 sketch；要高保真才写 `"renderMode": "hi"`。
+0b. **文案克制**。默认不写 `note`；写了也要 ≤16 字。禁止在界面上罗列功能说明或 AI 长句。
+0c. **可点就有反馈**。道具栏/背包/入口优先 `detail` 弹窗，而不是 toast 一句话。
+
 1. **不要手写整页 HTML**。写 `spec.json`，跑构建器。
 2. **不要加任何外链**（CDN 字体/图片/JS）。产物必须自包含。
 3. **产出后必须跑 `validate.mjs`**，ERROR 为 0 才能交付。
@@ -51,6 +60,8 @@ metadata:
 ### 1. 解析描述
 
 读 `workflows/01-parse.md`。产出：屏幕清单、跳转关系、内容块。
+如果是游戏，再读 `workflows/06-gameplay.md`：补 `game.genre`、核心操作闭环和
+`meta.orientation`（小游戏默认 `portrait`），不要把玩法做成只有 Toast 的静态稿。
 
 ### 2. 判别 game / app
 
@@ -116,6 +127,7 @@ node scripts/validate.mjs <name>.html
 ### 6. QA + 交付
 
 - 按 `workflows/04-qa.md` 至少完成 A（静态）；有条件做 B/C
+- 使用玩法 block 时必须跑 `tests/e2e_game_qa.py`（有 Playwright 时），验证操作前后数值而非只点导航
 - 交付话术模板：
 
 ```
@@ -129,13 +141,14 @@ node scripts/validate.mjs <name>.html
 - 演示点：主城 → 出征 → 战斗技能；底部 Dock 切换背包/排行
 ```
 
-## 能力速查（v1.1）
+## 能力速查（v1.2）
 
 | 需求 | 怎么写 |
 |---|---|
 | 图标 | `icon: "sword"`（名见 SCHEMA；未知名回退 emoji） |
 | 红点 | `badge: "pulse"` 或 `badge: { type:"dot", tone:"danger" }` |
 | 数字徽标 | `badge: 5` / `badge: { value:"新", tone:"new" }` |
+| 弹窗详情 | item/按钮加 `detail: { title, desc, rewards?, icon?, ok? }` |
 | 加载态 | block 上 `props.state: "loading"` |
 | 空/错态 | `state: "empty"|"error"` + emptyTitle/emptyAction |
 | 禁用 | `state: "disabled"` |
@@ -143,9 +156,19 @@ node scripts/validate.mjs <name>.html
 | 数字滚动 | stats 项 `countTo: 128400, countPrefix: "¥"` |
 | 入场动画 | block `anim: "fade-up"` 或 `meta.stagger: true` |
 | 加载条纹 | progress `indeterminate: true` |
-| 草图稿 | `meta.renderMode: "sketch"` |
+| 高保真 | `meta.renderMode: "hi"`（默认 sketch） |
 | 屏切换 | screen `transition: "zoom"` |
 | 运行时 tween | 页面内 `UXTween.to / UXTween.count`（见 SCHEMA） |
+| 游戏类型/方向 | `game.genre:"slg"` + `meta.orientation:"portrait"`（默认竖屏） |
+| SLG 核心循环 | `slg-map`：选格 → 行军/进攻 → 目标 → 回合 |
+| 卡牌战斗 | `card-battle`：费用、目标、伤害/治疗、抽牌 |
+| 打牌 | `poker-table`：多选、提示、理牌、出牌 |
+| 自走棋 | `auto-chess`：购买、站位、羁绊、升星、战斗 |
+| 头顶道具 | `overhead-bar`，或单位 `statuses/items` |
+| 战斗动画 | `anim-deal/hit/heal/lunge/land/level-up` + `UXGame.floatText` |
+| 横竖屏演示 | 按钮 `act:"orientation"` 或 `UX.toggleOrientation()` |
+
+完整玩法 spec：`examples/game-genres.spec.json`；产物：`examples/demo-game-genres.html`。
 
 ## 风格包一览
 
@@ -171,6 +194,8 @@ node scripts/validate.mjs <name>.html
 | `scripts/build.mjs` | 构建器（零依赖） |
 | `scripts/validate.mjs` | 飞书安全 / 自包含校验 |
 | `scripts/ux-core.css` `ux-core.js` | 基础样式与交互运行时 |
+| `scripts/game-blocks.mjs` | 玩法 block 渲染器 |
+| `scripts/game-core.css` `game-core.js` | 横竖屏、玩法状态与战斗动画（仅 game 内联） |
 | `scripts/chrome-recipes.css` | 每风格特化 |
 | `styles/*.tokens.json` | 风格包数据 |
 | `styles/SCHEMA.md` | spec 与 token schema（权威） |

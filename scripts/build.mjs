@@ -11,6 +11,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { renderGameBlock } from "./game-blocks.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
@@ -153,11 +154,11 @@ function wrapState(block, html, props = {}) {
     const isErr = st === "error";
     const icon = props.emptyIcon || (isErr ? "alert-triangle" : "inbox");
     const title = props.emptyTitle || (isErr ? "加载失败" : "暂无数据");
-    const desc = props.emptyDesc || (isErr ? "网络似乎开小差了，点击重试" : "这里还什么都没有");
+    const desc = props.emptyDesc != null ? props.emptyDesc : (isErr ? "点击重试" : "");
     const action = props.emptyAction
       ? `<button class="ux-btn ${isErr ? "ux-btn--primary" : ""} ux-btn--sm ux-empty__action" data-act="toast" data-toast="${esc(props.emptyActionToast || props.emptyAction)}">${esc(props.emptyAction)}</button>`
       : "";
-    return `<div class="ux-empty${isErr ? " ux-empty--error" : ""}${anim}"><div class="ux-empty__icon">${iconHtml(icon, 24)}</div><div class="ux-empty__title">${esc(title)}</div><p class="ux-empty__desc">${esc(desc)}</p>${action}</div>`;
+    return `<div class="ux-empty${isErr ? " ux-empty--error" : ""}${anim}"><div class="ux-empty__icon">${iconHtml(icon, 24)}</div><div class="ux-empty__title">${esc(title)}</div>${desc ? `<p class="ux-empty__desc">${esc(desc)}</p>` : ""}${action}</div>`;
   }
   if (st === "disabled") {
     return `<div class="ux-state-disabled${anim}" aria-disabled="true">${html}</div>`;
@@ -165,6 +166,19 @@ function wrapState(block, html, props = {}) {
   return html;
 }
 
+function modalAttrs(detail, fallbackTitle = "", fallbackBody = "") {
+  const d = detail || {};
+  const title = d.title || fallbackTitle || "详情";
+  const bodyLines = [];
+  if (d.desc || d.body) bodyLines.push(String(d.desc || d.body));
+  if (Array.isArray(d.lines)) d.lines.forEach((x) => bodyLines.push(String(x)));
+  if (Array.isArray(d.rewards) && d.rewards.length) {
+    bodyLines.push("");
+    d.rewards.forEach((r) => bodyLines.push("· " + (typeof r === "string" ? r : ((r.label || r.name || "") + (r.qty != null ? " ×" + r.qty : "")))));
+  }
+  const body = bodyLines.join("\n");
+  return ` data-act="modal" data-modal-title="${esc(title)}" data-modal-body="${esc(body)}" data-modal-ok="${esc(d.ok || "确定")}" data-modal-icon="${esc(d.icon || "")}"`;
+}
 function badgeHtml(b, asDot = false) {
   if (b == null || b === false) return "";
   if (b === true) return asDot ? `<span class="ux-dot ux-dot--pulse"></span>` : `<span class="ux-badge">1</span>`;
@@ -263,6 +277,8 @@ function blockHtml(b, ctx) {
 function blockHtmlInner(b, ctx) {
   const type = b.type;
   const p = b.props || {};
+  const gameBlock = renderGameBlock(b, ctx, { esc, iconHtml });
+  if (gameBlock !== null) return gameBlock;
   switch (type) {
     case "titlebar": {
       const back = p.back !== false && ctx.screens.length > 1
@@ -295,14 +311,14 @@ function blockHtmlInner(b, ctx) {
       const items = (p.items || []).map((it) => {
         const badge = badgeHtml(it.badge);
         const iconEl = ico(it.icon, 28) || `<span class="ux-tile__icon">${esc(it.icon || "📦")}</span>`;
-        const attrs = it.to ? ` data-goto="${esc(it.to)}"` : it.act ? ` data-act="${esc(it.act)}" data-toast="${esc(it.toast || it.title)}"` : "";
+        const attrs = it.to ? ` data-goto="${esc(it.to)}"` : (it.detail || it.act === "modal") ? modalAttrs(it.detail, it.title || "详情", it.sub || "") : it.act ? ` data-act="${esc(it.act)}" data-toast="${esc(it.toast || it.title)}"` : "";
         return `<button class="ux-tile"${attrs}>${badge}${iconEl}<span class="ux-tile__title">${esc(it.title || "")}</span>${it.sub ? `<span class="ux-tile__sub">${esc(it.sub)}</span>` : ""}</button>`;
       }).join("\n");
       return `<div class="ux-grid" data-cols="${cols}">${items}</div>`;
     }
     case "list": {
       const rows = (p.items || []).map((it) => {
-        const attrs = it.to ? ` data-goto="${esc(it.to)}"` : "";
+        const attrs = it.to ? ` data-goto="${esc(it.to)}"` : (it.detail || it.act === "modal") ? modalAttrs(it.detail, it.title || "详情", it.sub || "") : "";
         const trailBits = [];
         if (it.trailing) trailBits.push(`<span class="ux-row__trail">${esc(it.trailing)}</span>`);
         else {
@@ -338,9 +354,11 @@ function blockHtmlInner(b, ctx) {
         const block = b2.block ? " ux-btn--block" : "";
         const attrs = b2.to
           ? ` data-goto="${esc(b2.to)}"`
-          : b2.act
-            ? ` data-act="${esc(b2.act)}" data-toast="${esc(b2.toast || b2.label)}"`
-            : ` data-act="toast" data-toast="${esc(b2.toast || b2.label || "已点击")}"`
+          : b2.detail
+            ? modalAttrs(b2.detail, b2.label || "详情")
+            : b2.act
+              ? ` data-act="${esc(b2.act)}" data-toast="${esc(b2.toast || b2.label)}"`
+              : ` data-act="toast" data-toast="${esc(b2.toast || b2.label || "")}"`
         return `<button class="ux-btn${variant}${size}${block}"${attrs}>${b2.icon ? ico(b2.icon, 18) : ""}${esc(b2.label || "按钮")}</button>`;
       }).join("\n");
       return `<div class="ux-buttons">${btns}</div>`;
@@ -377,7 +395,10 @@ function blockHtmlInner(b, ctx) {
       return `<div class="ux-carousel" role="list">${items}</div>`;
     }
     case "note":
-      return `<aside class="ux-note">${p.text && /[<&]/.test(p.text) ? p.text : `<strong>${iconHtml(p.icon || "info", 12)} 策划注</strong> · ${esc(p.text || "")}`}</aside>`;
+      const noteText = String(p.text || "");
+      if (!noteText.trim()) return "";
+      if (/[<&]/.test(noteText)) return `<aside class="ux-note">${noteText}</aside>`;
+      return `<aside class="ux-note">${p.icon ? iconHtml(p.icon, 11) + " " : ""}${esc(noteText)}</aside>`;
     case "search":
       return `<div class="ux-search"><span class="ux-search__icon">${iconHtml("search", 16)}</span><input class="ux-input" type="search" placeholder="${esc(p.placeholder || "搜索")}"></div>`;
     case "tabs": {
@@ -414,7 +435,7 @@ function blockHtmlInner(b, ctx) {
     /* game-only */
     case "currency": {
       const items = (p.items || []).map((it) =>
-        `<span class="ux-currency__item"><span class="icon">${ico(it.icon, 15) || esc(it.icon || "💰")}</span><span>${esc(it.value ?? "0")}</span>${it.plus !== false ? `<button class="ux-currency__plus" data-act="toast" data-toast="打开${esc(it.label || "货币")}充值" aria-label="增加">+</button>` : ""}</span>`
+        `<button type="button" class="ux-currency__item"${it.detail || it.desc ? modalAttrs(it.detail || { title: it.label || "道具", desc: it.desc, icon: it.icon }, it.label || "道具") : ` data-act="toast" data-toast="${esc((it.label || "") + " " + (it.value ?? ""))}"`}><span class="icon">${ico(it.icon, 15) || esc(it.icon || "💰")}</span><span>${esc(it.value ?? "0")}</span>${it.plus !== false ? `<button class="ux-currency__plus" data-act="modal" data-modal-title="${esc((it.label || "获取") + " · 获取途径")}" data-modal-body="${esc(it.source || "商店 / 活动 / 任务")}" data-modal-ok="知道了" aria-label="增加">+</button>` : ""}</button>`
       ).join("");
       return `<div class="ux-currency">${items}</div>`;
     }
@@ -456,14 +477,14 @@ function blockHtmlInner(b, ctx) {
     }
     case "inventory": {
       const items = (p.items || []).map((it) =>
-        `<button class="ux-inv__slot" data-rarity="${esc(it.rarity || "common")}" data-act="toast" data-toast="${esc(it.name || "道具")}"><span class="ux-inv__icon">${ico(it.icon, 26) || esc(it.icon || "❔")}</span>${it.qty ? `<span class="ux-inv__qty">${esc(it.qty)}</span>` : ""}</button>`
+        `<button class="ux-inv__slot" data-rarity="${esc(it.rarity || "common")}"${modalAttrs(it.detail || { title: it.name || "道具", desc: it.desc || "", icon: it.icon, ok: "关闭" }, it.name || "道具")}><span class="ux-inv__icon">${ico(it.icon, 26) || esc(it.icon || "❔")}</span>${it.qty ? `<span class="ux-inv__qty">${esc(it.qty)}</span>` : ""}</button>`
       ).join("");
       return `<div class="ux-inv">${items}</div>`;
     }
     case "joystick-hint":
       return `<div class="ux-stick" aria-hidden="true"><div class="ux-stick__pad"></div><div class="ux-stick__btns"><span class="ux-stick__abtn">✕</span><span class="ux-stick__abtn ux-stick__abtn--main">⚔️</span></div></div>`;
     case "gacha-banner":
-      return `<button class="ux-gacha" type="button" ${p.to ? `data-goto="${esc(p.to)}"` : `data-act="toast" data-toast="${esc(p.toast || "进入祈愿")}"`}><span class="ux-gacha__star" aria-hidden="true">${ico(p.motif, 64) || esc(p.motif || "🌟")}</span><h3 class="ux-gacha__title">${esc(p.title || "限定祈愿")}</h3>${p.sub ? `<p class="ux-gacha__sub">${esc(p.sub)}</p>` : ""}<span class="ux-gacha__cta">${esc(p.cta || "查看详情")}</span></button>`;
+      return `<button class="ux-gacha" type="button" ${p.to ? `data-goto="${esc(p.to)}"` : modalAttrs(p.detail || { title: p.title || "限定祈愿", desc: p.sub || "", icon: p.motif || "star", ok: p.cta || "前往" }, p.title || "限定祈愿", p.sub || "")}><span class="ux-gacha__star" aria-hidden="true">${ico(p.motif, 64) || esc(p.motif || "🌟")}</span><h3 class="ux-gacha__title">${esc(p.title || "限定祈愿")}</h3>${p.sub ? `<p class="ux-gacha__sub">${esc(p.sub)}</p>` : ""}<span class="ux-gacha__cta">${esc(p.cta || "查看详情")}</span></button>`;
     case "state-switcher": {
       const hostId = p.for || ("st-" + ctx.screen.id + "-" + (ctx._ss = (ctx._ss || 0) + 1));
       const states = p.states || ["ready", "loading", "empty", "error"];
@@ -526,6 +547,8 @@ function buildHtml(spec, tokens) {
   const meta = spec.meta || {};
   const title = meta.title || "交互原型";
   const device = meta.device || "auto";
+  const orientation = meta.orientation || "portrait";
+  const genre = kind === "game" ? (spec.game?.genre || "generic") : "";
   const nav = resolveNav(spec);
   const screens = spec.screens && spec.screens.length ? spec.screens : [{ id: "home", title: title, blocks: [{ type: "hero", props: { title, sub: "空 spec", motif: "✨" } }] }];
   const demoHp = !!(spec.demo && spec.demo.hpDrain);
@@ -603,9 +626,12 @@ ${navHtml}
 ${footnote}
 <div class="ux-modal" role="dialog" aria-modal="true" aria-hidden="true">
   <div class="ux-modal__panel">
-    <h3 class="ux-modal__title">提示</h3>
-    <p class="ux-modal__body"></p>
-    <div class="ux-modal__actions">
+  <div class="ux-modal__head">
+    <div class="ux-modal__icon" hidden></div>
+    <h3 class="ux-modal__title">详情</h3>
+  </div>
+  <p class="ux-modal__body"></p>
+  <div class="ux-modal__actions">
       <button class="ux-btn" data-modal-close type="button">取消</button>
       <button class="ux-btn ux-btn--primary" data-modal-ok type="button">确定</button>
     </div>
@@ -616,13 +642,15 @@ ${footnote}
   const cssVars = tokensToCss(tokens);
   const coreCss = read(join(__dirname, "ux-core.css"));
   const chromeCss = read(join(__dirname, "chrome-recipes.css"));
+  const gameCss = kind === "game" ? read(join(__dirname, "game-core.css")) : "";
   const coreJs = read(join(__dirname, "ux-core.js"));
+  const gameJs = kind === "game" ? read(join(__dirname, "game-core.js")) : "";
 
   const deviceAttr = device === "auto" ? (kind === "app" ? "phone" : "phone") : device;
   const navAttr = (deviceAttr === "desktop" && kind === "app" && (nav.mode === "tabs" || nav.mode === "sidebar")) ? "sidebar" : nav.mode;
 
   return `<!DOCTYPE html>
-<html lang="${esc(meta.lang || "zh-CN")}" data-style="${esc(tokens.id)}" data-device="${esc(deviceAttr)}" data-nav="${esc(navAttr)}" data-render="${esc(meta.renderMode === "sketch" ? "sketch" : "hi")}">
+<html lang="${esc(meta.lang || "zh-CN")}" data-style="${esc(tokens.id)}" data-kind="${esc(kind)}" data-genre="${esc(genre)}" data-device="${esc(deviceAttr)}" data-nav="${esc(navAttr)}" data-orientation="${esc(orientation)}" data-orientation-view="${esc(orientation === "landscape" ? "landscape" : "portrait")}" data-render="${esc(meta.renderMode === "hi" ? "hi" : "sketch")}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -636,18 +664,21 @@ ${footnote}
 ${coreCss}
 
 ${chromeCss}
+
+${gameCss}
 </style>
 </head>
 <body>
 ${iconSprite()}
 <div class="ux-stage">
-  <div class="ux-frame" id="ux-app" data-title="${esc(title)}" data-initial="${esc(initial)}" data-demo-hp="${demoHp ? "1" : "0"}" data-demo-toast="${demoToasts ? "1" : "0"}" data-render="${esc(meta.renderMode === "sketch" ? "sketch" : "hi")}">
+  <div class="ux-frame" id="ux-app" data-title="${esc(title)}" data-initial="${esc(initial)}" data-orientation="${esc(orientation === "landscape" ? "landscape" : "portrait")}" data-demo-hp="${demoHp ? "1" : "0"}" data-demo-toast="${demoToasts ? "1" : "0"}" data-render="${esc(meta.renderMode === "hi" ? "hi" : "sketch")}">
 ${frameInner}
   </div>
 </div>
 <script>
 ${coreJs}
 </script>
+${kind === "game" ? `<script>\n${gameJs}\n</script>` : ""}
 </body>
 </html>
 `;
@@ -825,6 +856,12 @@ function main() {
   if (!spec.kind) throw new Error("spec.kind 必填: game | app");
   if (!spec.style) throw new Error("spec.style 必填（见 styles/catalog.md）");
   if (!spec.screens?.length) throw new Error("spec.screens 至少一项");
+  if (spec.meta?.orientation && !["portrait", "landscape", "auto"].includes(spec.meta.orientation)) {
+    throw new Error("meta.orientation 必须是 portrait | landscape | auto");
+  }
+  if (spec.game?.genre != null && typeof spec.game.genre !== "string") {
+    throw new Error("game.genre 必须是字符串");
+  }
 
   // id 唯一性
   const ids = new Set();

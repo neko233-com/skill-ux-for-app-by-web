@@ -13,6 +13,42 @@
   function $(sel, root) { return (root || doc).querySelector(sel); }
   function $$(sel, root) { return Array.prototype.slice.call((root || doc).querySelectorAll(sel)); }
 
+  /* ── 屏幕方向 ───────────────────────────────── */
+  var orientationPolicy = doc.documentElement.getAttribute("data-orientation") || "portrait";
+
+  function currentOrientation() {
+    if (orientationPolicy === "auto") {
+      return window.matchMedia && window.matchMedia("(orientation: landscape)").matches ? "landscape" : "portrait";
+    }
+    return orientationPolicy === "landscape" ? "landscape" : "portrait";
+  }
+
+  function applyOrientation() {
+    var value = currentOrientation();
+    doc.documentElement.setAttribute("data-orientation-view", value);
+    app.setAttribute("data-orientation", value);
+    return value;
+  }
+
+  function setOrientation(value) {
+    if (["portrait", "landscape", "auto"].indexOf(value) === -1) return currentOrientation();
+    orientationPolicy = value;
+    doc.documentElement.setAttribute("data-orientation", value);
+    return applyOrientation();
+  }
+
+  function toggleOrientation() {
+    return setOrientation(currentOrientation() === "landscape" ? "portrait" : "landscape");
+  }
+
+  if (window.matchMedia) {
+    var orientationMedia = window.matchMedia("(orientation: landscape)");
+    var onOrientationChange = function () { if (orientationPolicy === "auto") applyOrientation(); };
+    if (orientationMedia.addEventListener) orientationMedia.addEventListener("change", onOrientationChange);
+    else if (orientationMedia.addListener) orientationMedia.addListener(onOrientationChange);
+  }
+  applyOrientation();
+
   /* ── Tween 引擎 ─────────────────────────────── */
   var Ease = {
     linear: function (t) { return t; },
@@ -278,10 +314,17 @@
 
   /* modal */
   var modalEl = $(".ux-modal", app);
-  function openModal(title, body, okLabel, onOk) {
+  function openModal(title, body, okLabel, onOk, iconName) {
     if (!modalEl) { toast(title); return; }
     $(".ux-modal__title", modalEl).textContent = title || "";
-    $(".ux-modal__body", modalEl).textContent = body || "";
+    var bodyEl = $(".ux-modal__body", modalEl);
+    bodyEl.textContent = body || "";
+    bodyEl.style.whiteSpace = body && body.indexOf("\n") >= 0 ? "pre-line" : "";
+    var iconEl = $(".ux-modal__icon", modalEl);
+    if (iconEl) {
+      if (iconName) { iconEl.textContent = iconName; iconEl.hidden = false; }
+      else { iconEl.hidden = true; iconEl.textContent = ""; }
+    }
     var okBtn = $("[data-modal-ok]", modalEl);
     if (okLabel) okBtn.textContent = okLabel;
     modalEl.classList.add("is-open");
@@ -366,6 +409,12 @@
     }
     if (goto) { go(goto); return; }
     if (act === "back") { e.preventDefault(); back(); return; }
+    if (act === "orientation") {
+      e.preventDefault();
+      var nextOrientation = toggleOrientation();
+      toast(nextOrientation === "landscape" ? "已切换横屏" : "已切换竖屏");
+      return;
+    }
     if (act === "toast") {
       e.preventDefault();
       toast(t.getAttribute("data-toast") || "已触发");
@@ -379,7 +428,7 @@
     }
     if (act === "modal") {
       e.preventDefault();
-      openModal(t.getAttribute("data-modal-title") || "提示", t.getAttribute("data-modal-body") || "", t.getAttribute("data-modal-ok") || "确定");
+      openModal(t.getAttribute("data-modal-title") || "详情", t.getAttribute("data-modal-body") || "", t.getAttribute("data-modal-ok") || "确定", null, t.getAttribute("data-modal-icon") || "");
       return;
     }
     if (act === "form") {
@@ -431,5 +480,5 @@
   wireToggles();
   wireStateSwitchers();
 
-  window.UX = { go: go, back: back, toast: toast, tween: tween, count: countTo, seq: seq, ease: Ease, openModal: openModal, closeModal: closeModal };
+  window.UX = { go: go, back: back, toast: toast, tween: tween, count: countTo, seq: seq, ease: Ease, openModal: openModal, closeModal: closeModal, setOrientation: setOrientation, toggleOrientation: toggleOrientation };
 })();

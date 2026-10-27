@@ -19,7 +19,7 @@
 
 执行步骤（详见 SKILL.md）：
 
-1. **解析** 文字描述 → `kind`（game|app）+ 屏幕/流程/内容清单
+1. **解析** 文字描述 → `kind`（game|app）+ 屏幕/流程/内容清单；游戏补 `game.genre`、核心操作闭环和 `meta.orientation`（默认竖屏），读 `workflows/06-gameplay.md`
 2. **选风格**（用户点名 → 用点名；有参考图 → 视觉对齐最近风格包或写 custom；都没有 → 按 kind 推荐）
 3. **写 spec.json**（schema 见 `styles/SCHEMA.md`）
 4. **构建**：`node scripts/build.mjs --spec <spec.json> --out <out.html>`
@@ -33,6 +33,7 @@
 - `SKILL.md` — 完整工作流（权威）
 - `scripts/build.mjs` — 确定性 HTML 构建器（零依赖，Node ≥ 18）
 - `scripts/validate.mjs` — 产出物自包含/飞书安全校验
+- `scripts/game-blocks.mjs` + `game-core.css|js` — SLG/卡牌/打牌/自走棋、头顶道具、横竖屏与动画
 - `styles/` — 风格包（游戏 8 套 + 应用 6 套，可扩展）
 - `detection/` — 游戏 vs 应用判别
 - `workflows/` — 解析 / 参考图 / 组装 / QA / 飞书嵌入

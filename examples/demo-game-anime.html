@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-style="anime" data-device="phone" data-nav="dock" data-render="hi">
+<html lang="zh-CN" data-style="anime" data-kind="game" data-genre="generic" data-device="phone" data-nav="dock" data-orientation="portrait" data-orientation-view="portrait" data-render="hi">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -892,7 +892,12 @@ a { color: var(--ux-primary); text-decoration: none; }
 
 /* reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  *, *::before, *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════
@@ -1316,6 +1321,28 @@ a { color: var(--ux-primary); text-decoration: none; }
 .ux-state-host > .ux-state-view { display: none; }
 .ux-state-host > .ux-state-view.is-shown { display: block; }
 
+/* ── v1.2: 安静注释 / 弹窗图标 / 道具栏 ──────── */
+.ux-note {
+  font-size: 10px; line-height: 1.5;
+  color: var(--ux-ink-3);
+  background: transparent; border: none;
+  border-left: 2px solid var(--ux-line);
+  border-radius: 0; padding: 2px 0 2px 8px;
+  margin-bottom: 12px;
+}
+.ux-note strong { font-weight: 500; color: var(--ux-ink-3); }
+.ux-empty__desc:empty { display: none; }
+.ux-modal__head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.ux-modal__icon {
+  width: 40px; height: 40px; border-radius: var(--ux-r-md);
+  background: var(--ux-surface-2); display: grid; place-items: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.ux-modal__title { margin: 0; flex: 1; }
+.ux-currency__item { cursor: pointer; transition: transform var(--ux-dur-fast) var(--ux-ease); }
+.ux-currency__item:active { transform: scale(0.96); }
+.ux-inv__slot { cursor: pointer; }
+[data-render="sketch"] .ux-note { border-left-color: #C8C2B8; color: #8A8580; }
 
 /* chrome-recipes.css — 按 [data-style] 叠加的风格特化（构建时按需整文件内联） */
 
@@ -1844,60 +1871,828 @@ a { color: var(--ux-primary); text-decoration: none; }
 [data-style="ink-minimal"] .ux-progress__track { background: var(--ux-surface-2); border: none; }
 [data-style="ink-minimal"] .ux-progress__bar { background: var(--ux-ink); }
 
+
+/* game-core.css — 游戏原型布局、玩法组件与反馈动画（构建时内联） */
+
+/* 游戏默认竖屏；横屏使用宽画幅并重排 Dock，而不是旋转整页。 */
+@media (min-width: 640px) {
+  html[data-kind="game"][data-device="phone"][data-orientation-view="landscape"] .ux-frame {
+    width: min(900px, calc(100vw - 32px));
+    height: min(506px, calc(100vh - 56px));
+    height: min(506px, calc(100dvh - 56px));
+  }
+}
+
+@media (min-width: 640px) {
+html[data-kind="game"][data-orientation-view="landscape"] .ux-titlebar {
+  min-height: 44px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+html[data-kind="game"][data-orientation-view="landscape"] .ux-scroll {
+  padding: 12px;
+}
+html[data-kind="game"][data-orientation-view="landscape"][data-nav="dock"] .ux-screens {
+  margin-right: 74px;
+}
+html[data-kind="game"][data-orientation-view="landscape"][data-nav="dock"] .ux-tabbar {
+  left: auto;
+  top: 0;
+  width: 74px;
+  min-height: 0;
+  flex-direction: column;
+  padding: 8px 6px;
+  border-top: 0;
+  border-left: var(--ux-border-w) solid var(--ux-line);
+}
+html[data-kind="game"][data-orientation-view="landscape"][data-nav="dock"] .ux-tabbar__item {
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 48px;
+  max-height: 76px;
+}
+html[data-kind="game"][data-orientation-view="landscape"][data-nav="dock"] .ux-tabbar__item .ux-dot,
+html[data-kind="game"][data-orientation-view="landscape"][data-nav="dock"] .ux-tabbar__item .ux-badge {
+  left: 62%;
+}
+html[data-kind="game"][data-orientation-view="landscape"][data-nav="dock"] .ux-scroll {
+  padding-bottom: 12px;
+}
+html[data-kind="game"][data-orientation-view="landscape"] .ux-toast {
+  bottom: 20px;
+}
+}
+
+/* ── 通用游戏状态与操作 ───────────────────────── */
+.u-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+[data-game-root] {
+  min-width: 0;
+  margin-bottom: 14px;
+  color: var(--ux-ink);
+}
+[data-game-root] button:focus-visible,
+[data-game-root] [role="button"]:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ux-accent) 70%, transparent);
+  outline-offset: 2px;
+}
+.ux-game-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-bottom: 8px;
+  font-size: var(--ux-fs-xs);
+  color: var(--ux-ink-2);
+}
+.ux-game-status > span { white-space: nowrap; }
+.ux-game-status strong {
+  color: var(--ux-ink);
+  font-variant-numeric: tabular-nums;
+}
+.ux-game-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 8px 0;
+}
+.ux-game-actions--spread { justify-content: space-between; }
+.ux-game-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 1 1 auto;
+  min-height: 40px;
+  padding: 6px 11px;
+  border-radius: var(--ux-r-md);
+  border: var(--ux-border-w) solid var(--ux-border-c);
+  background: var(--ux-surface);
+  box-shadow: var(--ux-sh-btn);
+  color: var(--ux-ink);
+  font-size: var(--ux-fs-xs);
+  font-weight: var(--ux-weight-strong);
+  transition: transform var(--ux-dur-fast) var(--ux-ease), opacity var(--ux-dur-fast) linear;
+}
+.ux-game-action--primary { background: var(--ux-primary); color: var(--ux-on-primary); border-color: transparent; }
+.ux-game-action--ghost { background: transparent; box-shadow: none; }
+.ux-game-action.is-active { background: var(--ux-accent); color: #fff; }
+.ux-game-action:active:not(:disabled) { transform: scale(var(--ux-press)); }
+.ux-game-action:disabled { opacity: .38; cursor: not-allowed; box-shadow: none; }
+.ux-game-log {
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: var(--ux-r-sm);
+  background: color-mix(in srgb, var(--ux-primary) 8%, var(--ux-surface));
+  border-left: 3px solid var(--ux-primary);
+  color: var(--ux-ink-2);
+  font-size: var(--ux-fs-xs);
+  line-height: 1.45;
+}
+
+/* ── 头顶状态 / 道具栏与单位 ──────────────────── */
+.ux-overhead {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(300px, 100%);
+  margin: 8px auto 16px;
+  padding: 8px 12px 12px;
+  border-radius: var(--ux-r-lg);
+  background: color-mix(in srgb, var(--ux-surface) 92%, transparent);
+  border: var(--ux-border-w) solid var(--ux-border-c);
+  box-shadow: var(--ux-sh-card);
+}
+.ux-overhead__statuses,
+.ux-overhead__items {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ux-overhead__statuses::-webkit-scrollbar,
+.ux-overhead__items::-webkit-scrollbar { display: none; }
+.ux-overhead__statuses { min-height: 20px; margin-bottom: 4px; }
+.ux-overhead__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  border-radius: var(--ux-r-full);
+  background: var(--ux-surface-2);
+  color: var(--ux-ink-2);
+  font-size: 10px;
+}
+.ux-overhead__status[data-tone="danger"] { color: var(--ux-danger); }
+.ux-overhead__status[data-tone="ok"] { color: var(--ux-ok); }
+.ux-overhead__items { padding: 3px; margin-bottom: 7px; }
+.ux-overhead__item {
+  position: relative;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--ux-r-md);
+  background: var(--ux-surface);
+  border: var(--ux-border-w) solid var(--ux-border-c);
+  box-shadow: var(--ux-sh-btn);
+}
+.ux-overhead__item:disabled { opacity: .35; filter: grayscale(1); }
+.ux-overhead__qty {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  min-width: 17px;
+  height: 17px;
+  display: grid;
+  place-items: center;
+  padding: 0 3px;
+  border-radius: var(--ux-r-full);
+  background: var(--ux-ink);
+  color: var(--ux-bg);
+  font-size: 9px;
+  font-weight: 800;
+}
+.ux-overhead__avatar {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ux-primary), var(--ux-accent));
+  font-size: 30px;
+}
+.ux-overhead__name { margin-top: 5px; font-size: var(--ux-fs-sm); font-weight: 800; }
+.ux-overhead__name > span { margin-left: 6px; color: var(--ux-primary); font-size: 10px; }
+.ux-overhead__health { width: 150px; margin-top: 5px; text-align: center; }
+.ux-overhead__health .ux-unit-health { width: 100%; }
+.ux-overhead__health .ux-unit-health__text { display: block; }
+.ux-unit {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  min-width: 76px;
+  color: var(--ux-ink);
+  text-align: center;
+}
+.ux-combat-unit {
+  padding: 18px 8px 8px;
+  border-radius: var(--ux-r-md);
+  border: 2px solid transparent;
+  background: var(--ux-surface);
+}
+.ux-combat-unit.is-selected { border-color: var(--ux-accent); box-shadow: var(--ux-glow); }
+.ux-unit__overhead {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 3px);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 150px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.ux-unit__statuses,
+.ux-unit__items { display: flex; gap: 2px; }
+.ux-unit__status,
+.ux-unit__item {
+  position: relative;
+  min-width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0 3px;
+  border-radius: var(--ux-r-sm);
+  background: var(--ux-surface);
+  border: 1px solid var(--ux-line);
+  box-shadow: 0 2px 6px rgba(0,0,0,.16);
+  font-size: 10px;
+}
+.ux-unit__status[data-tone="danger"] { color: var(--ux-danger); }
+.ux-unit__status[data-tone="ok"] { color: var(--ux-ok); }
+.ux-unit__item b { position: absolute; right: -2px; bottom: -3px; font-size: 8px; }
+.ux-unit__stars { min-height: 12px; color: #FFB020; font-size: 10px; letter-spacing: -1px; }
+.ux-combat-unit .ux-unit__stars { display: none; }
+.ux-unit__avatar {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ux-primary), var(--ux-accent));
+  font-size: 27px;
+  box-shadow: var(--ux-sh-btn);
+}
+.ux-unit[data-team="enemy"] .ux-unit__avatar { background: linear-gradient(135deg, var(--ux-danger), var(--ux-accent)); }
+.ux-unit__name {
+  max-width: 100px;
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 800;
+}
+.ux-unit-health {
+  display: block;
+  width: 70px;
+  height: 6px;
+  margin-top: 4px;
+  overflow: hidden;
+  border-radius: var(--ux-r-full);
+  background: rgba(0,0,0,.22);
+  border: 1px solid var(--ux-line);
+}
+.ux-unit-health > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--ux-ok), #6dff9a);
+  transition: width var(--ux-dur) var(--ux-ease);
+}
+.ux-unit-health__text { margin-top: 1px; color: var(--ux-ink-3); font-size: 8px; font-variant-numeric: tabular-nums; }
+.ux-unit.is-dead { opacity: .42; filter: grayscale(1); }
+.ux-unit.is-dead .ux-unit__avatar { transform: rotate(12deg); }
+.ux-turnbar {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ux-turnbar__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1 0 auto;
+  padding: 7px 10px;
+  border-radius: var(--ux-r-full);
+  background: var(--ux-surface);
+  border: var(--ux-border-w) solid var(--ux-border-c);
+  color: var(--ux-ink-3);
+  font-size: var(--ux-fs-xs);
+}
+.ux-turnbar__item strong { color: var(--ux-ink); }
+
+/* ── SLG 地图 ────────────────────────────────── */
+.ux-slg {
+  padding: 10px;
+  border-radius: var(--ux-r-lg);
+  background: var(--ux-surface);
+  border: var(--ux-border-w) solid var(--ux-border-c);
+  box-shadow: var(--ux-sh-card);
+}
+.ux-slg__layout { display: grid; gap: 10px; }
+.ux-slg__map {
+  display: grid;
+  grid-template-columns: repeat(var(--slg-cols), minmax(0, 1fr));
+  gap: 4px;
+  min-width: 0;
+  padding: 6px;
+  border-radius: var(--ux-r-md);
+  background: var(--ux-surface-2);
+  border: 1px solid var(--ux-line);
+}
+.ux-slg__cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 44px;
+  aspect-ratio: 1;
+  padding: 3px;
+  border-radius: var(--ux-r-sm);
+  background: color-mix(in srgb, var(--ux-ok) 13%, var(--ux-surface));
+  border: 1px solid var(--ux-line);
+  color: var(--ux-ink);
+  transition: transform var(--ux-dur-fast) var(--ux-ease), box-shadow var(--ux-dur-fast) linear;
+}
+.ux-slg__cell[data-terrain="water"] { background: color-mix(in srgb, var(--ux-accent) 24%, var(--ux-surface)); }
+.ux-slg__cell[data-terrain="mountain"] { background: color-mix(in srgb, var(--ux-ink-3) 20%, var(--ux-surface)); }
+.ux-slg__cell[data-terrain="city"] { background: color-mix(in srgb, var(--ux-warn) 20%, var(--ux-surface)); }
+.ux-slg__cell[data-owner="player"] { box-shadow: inset 0 0 0 2px var(--ux-primary); }
+.ux-slg__cell[data-owner="enemy"] { box-shadow: inset 0 0 0 2px var(--ux-danger); }
+.ux-slg__cell.is-selected { outline: 3px solid var(--ux-accent); z-index: 1; transform: translateY(-2px); }
+.ux-slg__cell.is-target { box-shadow: inset 0 0 0 3px var(--ux-ok), 0 0 12px color-mix(in srgb, var(--ux-ok) 55%, transparent); }
+.ux-slg__cell.is-scouted::after { content: "◎"; position: absolute; top: 2px; right: 4px; color: var(--ux-accent); font-size: 11px; }
+.ux-slg__terrain { font-size: 20px; line-height: 1; }
+.ux-slg__label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; }
+.ux-slg__power { position: absolute; right: 3px; bottom: 2px; font-size: 10px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.ux-slg__panel { min-width: 0; }
+.ux-slg__detail { min-height: 42px; color: var(--ux-ink-2); font-size: var(--ux-fs-xs); line-height: 1.5; }
+.ux-slg__panel .ux-game-action { flex: 1 1 calc(33.333% - 7px); }
+
+/* ── 卡牌战斗 ────────────────────────────────── */
+.ux-cardbattle {
+  padding: 10px;
+  border-radius: var(--ux-r-lg);
+  background:
+    radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--ux-accent) 15%, transparent), transparent 48%),
+    var(--ux-surface);
+  border: var(--ux-border-w) solid var(--ux-border-c);
+}
+.ux-cardbattle__arena { display: grid; gap: 10px; align-items: center; }
+.ux-cardbattle__enemies { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; padding-top: 16px; }
+.ux-cardbattle__enemy { min-width: 100px; }
+.ux-cardbattle__player { justify-self: center; padding-top: 12px; }
+.ux-card-hand {
+  display: flex;
+  gap: 9px;
+  margin: 10px -4px 0;
+  padding: 14px 4px 12px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
+.ux-game-card {
+  position: relative;
+  flex: 0 0 112px;
+  min-height: 154px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px 8px;
+  scroll-snap-align: start;
+  border-radius: var(--ux-r-md);
+  border: 2px solid var(--ux-border-c);
+  background: linear-gradient(160deg, var(--ux-surface), var(--ux-surface-2));
+  box-shadow: var(--ux-sh-card);
+  color: var(--ux-ink);
+  text-align: center;
+  transition: transform var(--ux-dur-fast) var(--ux-ease), opacity var(--ux-dur-fast) linear, border-color var(--ux-dur-fast) linear;
+}
+.ux-game-card[data-rarity="rare"] { border-color: var(--ux-accent); }
+.ux-game-card[data-rarity="epic"] { border-color: #B44DFF; }
+.ux-game-card[data-rarity="legend"] { border-color: #FFB020; }
+.ux-game-card.is-selected { transform: translateY(-10px); border-color: var(--ux-primary); box-shadow: var(--ux-glow); }
+.ux-game-card.is-disabled { opacity: .46; filter: grayscale(.6); }
+.ux-game-card__cost {
+  position: absolute;
+  top: -8px;
+  left: -5px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ux-accent);
+  color: #fff;
+  border: 2px solid var(--ux-surface);
+  font-size: 13px;
+  font-weight: 900;
+}
+.ux-game-card__art { font-size: 32px; line-height: 1.2; }
+.ux-game-card__name { font-size: var(--ux-fs-sm); }
+.ux-game-card__desc { flex: 1; color: var(--ux-ink-2); font-size: 10px; line-height: 1.35; }
+.ux-game-card__type { color: var(--ux-ink-3); font-size: 9px; }
+.ux-cardbattle.is-victory { box-shadow: 0 0 0 3px var(--ux-ok), var(--ux-glow); }
+.ux-cardbattle.is-defeat { box-shadow: 0 0 0 3px var(--ux-danger); }
+
+/* ── 扑克牌桌 ────────────────────────────────── */
+.ux-poker {
+  padding: 10px;
+  border-radius: var(--ux-r-lg);
+  background: var(--ux-surface);
+  border: var(--ux-border-w) solid var(--ux-border-c);
+}
+.ux-poker__opponents { display: flex; justify-content: space-around; gap: 8px; }
+.ux-poker-opponent {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 78px;
+  color: var(--ux-ink-3);
+  font-size: 9px;
+}
+.ux-poker-opponent strong { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ux-ink); font-size: var(--ux-fs-xs); }
+.ux-poker-opponent__avatar { font-size: 25px; }
+.ux-poker-opponent b { color: var(--ux-primary); font-size: var(--ux-fs-md); }
+.ux-poker__table {
+  display: grid;
+  place-items: center;
+  min-height: 112px;
+  margin: 8px 0;
+  padding: 12px;
+  border-radius: 46% / 24%;
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--ux-ok) 22%, var(--ux-surface)), color-mix(in srgb, var(--ux-ok) 10%, var(--ux-surface-2)));
+  border: 2px solid color-mix(in srgb, var(--ux-ok) 48%, var(--ux-line));
+  box-shadow: var(--ux-inset);
+}
+.ux-poker__trick { display: flex; justify-content: center; min-height: 68px; align-items: center; }
+.ux-poker__waiting { color: var(--ux-ink-3); font-size: var(--ux-fs-xs); }
+.ux-poker__played-set { display: flex; justify-content: center; gap: 5px; }
+.ux-poker-hand {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  min-height: 102px;
+  padding: 18px 5px 10px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+.ux-poker-card {
+  position: relative;
+  flex: 0 0 52px;
+  width: 52px;
+  height: 76px;
+  scroll-snap-align: start;
+  border-radius: 7px;
+  border: 1px solid #A7A7A7;
+  background: #FFF;
+  box-shadow: 0 3px 8px rgba(0,0,0,.2);
+  color: #202124;
+  text-align: left;
+  transition: transform var(--ux-dur-fast) var(--ux-ease), opacity var(--ux-dur-fast) linear;
+}
+.ux-poker-card[data-color="red"] { color: #D63845; }
+.ux-poker-card.is-selected { transform: translateY(-12px); outline: 3px solid var(--ux-accent); }
+.ux-poker-card__rank { position: absolute; top: 4px; left: 5px; font-size: 17px; font-weight: 900; line-height: 1; }
+.ux-poker-card__suit { position: absolute; top: 22px; left: 6px; font-size: 13px; }
+.ux-poker-card__suit--large { top: auto; left: auto; right: 5px; bottom: 2px; font-size: 29px; opacity: .85; }
+.ux-poker-card--played { flex-basis: 48px; width: 48px; height: 68px; opacity: 1; cursor: default; }
+.ux-poker-card--played:disabled { color: inherit; }
+
+/* ── 自走棋 ──────────────────────────────────── */
+.ux-tactics {
+  padding: 9px;
+  border-radius: var(--ux-r-lg);
+  background: var(--ux-surface);
+  border: var(--ux-border-w) solid var(--ux-border-c);
+}
+.ux-tactics__status { gap: 5px 10px; }
+.ux-tactics__synergies { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.ux-tactics__synergy {
+  display: inline-flex;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: var(--ux-r-full);
+  background: var(--ux-surface-2);
+  border: 1px solid var(--ux-line);
+  color: var(--ux-ink-3);
+  font-size: 9px;
+}
+.ux-tactics__synergy.is-active { background: color-mix(in srgb, var(--ux-accent) 18%, var(--ux-surface)); border-color: var(--ux-accent); color: var(--ux-ink); }
+.ux-tactics__layout { display: grid; gap: 9px; }
+.ux-tactics__board {
+  display: grid;
+  grid-template-columns: repeat(var(--tactics-cols), minmax(0, 1fr));
+  gap: 4px;
+  min-width: 0;
+  padding: 24px 5px 7px;
+  border-radius: var(--ux-r-md);
+  border: 1px solid var(--ux-line);
+  background:
+    linear-gradient(45deg, color-mix(in srgb, var(--ux-primary) 7%, transparent) 25%, transparent 25%, transparent 75%, color-mix(in srgb, var(--ux-primary) 7%, transparent) 75%),
+    var(--ux-surface-2);
+  background-size: 24px 24px;
+}
+.ux-tactics__slot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 48px;
+  aspect-ratio: 1;
+  border-radius: var(--ux-r-sm);
+  border: 1px dashed color-mix(in srgb, var(--ux-line) 75%, transparent);
+  cursor: pointer;
+  transition: background var(--ux-dur-fast) linear, transform var(--ux-dur-fast) var(--ux-ease);
+}
+.ux-tactics__slot:hover { background: color-mix(in srgb, var(--ux-primary) 10%, transparent); }
+.ux-tactics__slot.is-selected { border: 2px solid var(--ux-accent); background: color-mix(in srgb, var(--ux-accent) 16%, transparent); transform: translateY(-2px); }
+.ux-tactics__slot:has([data-team="enemy"]) { background: color-mix(in srgb, var(--ux-danger) 10%, transparent); border-color: color-mix(in srgb, var(--ux-danger) 50%, transparent); }
+.ux-tactics__slot .ux-unit { min-width: 0; width: 100%; pointer-events: none; }
+.ux-unit--compact .ux-unit__avatar { width: 29px; height: 29px; font-size: 18px; }
+.ux-unit--compact .ux-unit__name { max-width: 52px; font-size: 8px; }
+.ux-unit--compact .ux-unit-health { width: 38px; height: 4px; margin-top: 2px; }
+.ux-unit--compact .ux-unit-health__text { display: none; }
+.ux-unit--compact .ux-unit__stars { font-size: 8px; min-height: 9px; }
+.ux-unit--compact .ux-unit__overhead { bottom: calc(100% + 1px); }
+.ux-unit--compact .ux-unit__status,
+.ux-unit--compact .ux-unit__item { min-width: 14px; height: 14px; padding: 0 1px; font-size: 8px; }
+.ux-tactics__bench-label { margin-bottom: 4px; color: var(--ux-ink-3); font-size: 9px; }
+.ux-tactics__bench {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(44px, 1fr);
+  gap: 4px;
+  padding: 19px 3px 4px;
+  overflow-x: auto;
+  border-radius: var(--ux-r-sm);
+  background: var(--ux-surface-2);
+}
+.ux-tactics__shop { display: flex; gap: 5px; margin-top: 7px; overflow-x: auto; padding: 3px 1px; }
+.ux-tactics__offer {
+  position: relative;
+  flex: 1 0 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 91px;
+  padding: 6px 4px;
+  border-radius: var(--ux-r-sm);
+  background: var(--ux-surface-2);
+  border: 1px solid var(--ux-line);
+  color: var(--ux-ink-3);
+  font-size: 8px;
+}
+.ux-tactics__offer strong { max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ux-ink); font-size: 10px; }
+.ux-tactics__offer b { color: var(--ux-warn); font-size: 10px; }
+.ux-tactics__offer-art { font-size: 25px; }
+.ux-tactics__offer.is-unaffordable { opacity: .58; }
+.ux-tactics__offer.is-sold { opacity: .32; filter: grayscale(1); }
+.ux-tactics__offer.is-sold::after { content: "已售"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--ux-ink); font-size: 12px; font-weight: 900; }
+.ux-tactics__panel { min-width: 0; }
+.ux-tactics__panel .ux-game-action { padding-left: 7px; padding-right: 7px; }
+
+/* 横屏：地图/棋盘与操作面板双栏，牌桌压缩纵向空间；窄屏保持单栏。 */
+@media (min-width: 640px) {
+html[data-kind="game"][data-orientation-view="landscape"] .ux-slg__layout,
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics__layout {
+  grid-template-columns: minmax(0, 1.25fr) minmax(220px, .9fr);
+  align-items: start;
+}
+html[data-kind="game"][data-orientation-view="landscape"] .ux-game-status { margin-bottom: 4px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-game-action { min-height: 34px; padding: 4px 8px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-game-actions { margin: 4px 0; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-game-log { min-height: 30px; padding: 6px 8px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-slg__map {
+  height: min(260px, calc(100dvh - 210px));
+  min-height: 160px;
+  grid-auto-rows: 1fr;
+}
+html[data-kind="game"][data-orientation-view="landscape"] .ux-slg__cell { aspect-ratio: auto; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-slg__panel {
+  max-height: min(260px, calc(100dvh - 210px));
+  overflow-y: auto;
+}
+html[data-kind="game"][data-orientation-view="landscape"] .ux-cardbattle {
+  display: grid;
+  grid-template-columns: minmax(180px, .8fr) minmax(0, 1.2fr);
+  column-gap: 8px;
+}
+html[data-kind="game"][data-orientation-view="landscape"] .ux-cardbattle > .ux-game-status { grid-column: 1 / -1; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-cardbattle__arena {
+  grid-column: 1;
+  grid-row: 2 / 5;
+  grid-template-columns: 1fr;
+  align-content: start;
+  gap: 4px;
+}
+html[data-kind="game"][data-orientation-view="landscape"] .ux-cardbattle__enemies { justify-content: center; gap: 4px; padding-top: 0; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-cardbattle__enemy { min-width: 76px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-cardbattle .ux-combat-unit { padding: 6px 4px 4px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-cardbattle .ux-unit__avatar { width: 34px; height: 34px; font-size: 20px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-cardbattle .ux-unit-health { width: 50px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-cardbattle__player { padding-top: 4px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-card-hand {
+  grid-column: 2;
+  grid-row: 2;
+  min-height: 0;
+  margin: 0;
+  padding: 9px 2px 5px;
+}
+html[data-kind="game"][data-orientation-view="landscape"] .ux-game-card { flex-basis: 86px; min-height: 110px; padding: 8px 6px 5px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-game-card__art { font-size: 25px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-game-card__desc { font-size: 9px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-game-card__cost { width: 23px; height: 23px; font-size: 11px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-cardbattle > .ux-game-actions { grid-column: 2; grid-row: 3; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-cardbattle > .ux-game-log { grid-column: 2; grid-row: 4; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-poker {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  column-gap: 7px;
+}
+html[data-kind="game"][data-orientation-view="landscape"] .ux-poker > .ux-game-status { grid-column: 1 / -1; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-poker__opponents { grid-column: 1; grid-row: 2 / 6; flex-direction: column; justify-content: center; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-poker__table { grid-column: 2; grid-row: 2; min-height: 62px; margin: 3px 0; padding: 4px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-poker__trick { min-height: 52px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-poker-hand { grid-column: 2; grid-row: 3; min-height: 72px; padding: 9px 4px 5px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-poker-card { width: 42px; height: 58px; flex-basis: 42px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-poker-card__rank { font-size: 14px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-poker-card__suit { top: 18px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-poker-card__suit--large { top: auto; font-size: 22px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-poker > .ux-game-actions { grid-column: 2; grid-row: 4; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-poker > .ux-game-log { grid-column: 2; grid-row: 5; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics__synergies { margin-bottom: 4px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics__board { padding: 18px 4px 4px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics__slot { min-height: 0; height: 44px; aspect-ratio: auto; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics__bench-label { display: none; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics__bench { padding: 14px 3px 3px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics__shop { flex-wrap: nowrap; margin-top: 4px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics__offer { min-height: 64px; flex-basis: 58px; padding: 3px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics__offer-art { font-size: 20px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics__offer > span:not(.ux-tactics__offer-art) { display: none; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics .ux-unit--compact .ux-unit__avatar { width: 22px; height: 22px; font-size: 14px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics .ux-unit--compact .ux-unit__name { font-size: 7px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics .ux-unit--compact .ux-unit-health { width: 28px; height: 3px; }
+html[data-kind="game"][data-orientation-view="landscape"] .ux-tactics .ux-unit--compact .ux-unit__stars { min-height: 7px; font-size: 7px; }
+}
+
+/* ── 战斗与操作反馈动画 ───────────────────────── */
+@keyframes ux-game-float {
+  0% { opacity: 0; transform: translate(-50%, 4px) scale(.75); }
+  18% { opacity: 1; transform: translate(-50%, -4px) scale(1.08); }
+  100% { opacity: 0; transform: translate(-50%, -52px) scale(1); }
+}
+@keyframes ux-deal {
+  from { opacity: 0; transform: translateY(24px) rotate(4deg) scale(.85); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes ux-hit {
+  0%, 100% { transform: translateX(0); filter: none; }
+  25% { transform: translateX(-6px); filter: brightness(1.7) saturate(1.6); }
+  55% { transform: translateX(5px); }
+  75% { transform: translateX(-2px); }
+}
+@keyframes ux-heal {
+  0%, 100% { filter: none; }
+  50% { filter: drop-shadow(0 0 12px var(--ux-ok)); transform: scale(1.06); }
+}
+@keyframes ux-lunge {
+  0%, 100% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-12px) scale(1.08); }
+}
+@keyframes ux-land {
+  0% { opacity: .45; transform: translateY(-20px) scale(1.12); }
+  70% { transform: translateY(3px) scale(.96); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes ux-level-up {
+  0% { transform: scale(.8); filter: none; }
+  55% { transform: scale(1.2); filter: drop-shadow(0 0 16px #FFB020); }
+  100% { transform: scale(1); filter: none; }
+}
+@keyframes ux-glow-once {
+  0%, 100% { filter: none; }
+  50% { filter: drop-shadow(0 0 14px var(--ux-accent)); }
+}
+@keyframes ux-card-leave {
+  to { opacity: 0; transform: translateY(-34px) rotate(-5deg) scale(.72); }
+}
+.ux-game-float {
+  position: absolute;
+  z-index: 80;
+  pointer-events: none;
+  color: var(--ux-danger);
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 2px 4px var(--ux-surface), 0 0 8px var(--ux-surface);
+  animation: ux-game-float .85s var(--ux-ease) both;
+}
+.ux-game-float--heal { color: var(--ux-ok); }
+.ux-game-float--shield { color: var(--ux-accent); }
+.ux-game-float--buff { color: #FFB020; font-size: 18px; }
+.anim-deal { animation: ux-deal .38s var(--ux-ease) both; }
+.anim-hit { animation: ux-hit .36s var(--ux-ease) both; }
+.anim-heal { animation: ux-heal .48s var(--ux-ease) both; }
+.anim-lunge { animation: ux-lunge .42s var(--ux-ease) both; }
+.anim-land { animation: ux-land .42s var(--ux-ease) both; }
+.anim-level-up { animation: ux-level-up .65s var(--ux-ease) both; }
+.anim-glow-once { animation: ux-glow-once .6s var(--ux-ease) both; }
+.ux-game-card.is-leaving,
+.ux-poker-card.is-leaving { animation: ux-card-leave .24s ease-in both; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-game-root] *,
+  [data-game-root] *::before,
+  [data-game-root] *::after,
+  .ux-game-float {
+    animation: none !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ux-game-card.is-selected,
+  .ux-poker-card.is-selected { transform: none; }
+}
+
 </style>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><symbol id="uxi-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></symbol><symbol id="uxi-search" viewBox="0 0 24 24"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"/></symbol><symbol id="uxi-settings" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol><symbol id="uxi-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></symbol><symbol id="uxi-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="uxi-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></symbol><symbol id="uxi-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></symbol><symbol id="uxi-star" viewBox="0 0 24 24"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></symbol><symbol id="uxi-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol><symbol id="uxi-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol><symbol id="uxi-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol><symbol id="uxi-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></symbol><symbol id="uxi-chevron-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol><symbol id="uxi-chevron-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol><symbol id="uxi-chevron-up" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></symbol><symbol id="uxi-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol><symbol id="uxi-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></symbol><symbol id="uxi-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></symbol><symbol id="uxi-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></symbol><symbol id="uxi-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></symbol><symbol id="uxi-refresh" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10"/><path d="M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></symbol><symbol id="uxi-share" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></symbol><symbol id="uxi-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></symbol><symbol id="uxi-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></symbol><symbol id="uxi-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></symbol><symbol id="uxi-eye-off" viewBox="0 0 24 24"><path d="M17.9 17.9A10.1 10.1 0 0 1 12 20C5 20 1 12 1 12a18.5 18.5 0 0 1 5.1-5.9"/><path d="M9.9 4.2A10.9 10.9 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.2 3.2"/><path d="M14.1 14.1a3 3 0 1 1-4.2-4.2"/><path d="M1 1l22 22"/></symbol><symbol id="uxi-lock" viewBox="0 0 24 24"><path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol><symbol id="uxi-unlock" viewBox="0 0 24 24"><path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></symbol><symbol id="uxi-mail" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></symbol><symbol id="uxi-send" viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></symbol><symbol id="uxi-calendar" viewBox="0 0 24 24"><path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></symbol><symbol id="uxi-clock" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/><path d="M12 6v6l4 2"/></symbol><symbol id="uxi-camera" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><path d="M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></symbol><symbol id="uxi-image" viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/><path d="M8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/><path d="M21 15l-5-5L5 21"/></symbol><symbol id="uxi-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></symbol><symbol id="uxi-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></symbol><symbol id="uxi-filter" viewBox="0 0 24 24"><path d="M22 3H2l8 9.5V19l4 2v-8.5z"/></symbol><symbol id="uxi-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="uxi-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol><symbol id="uxi-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/></symbol><symbol id="uxi-trash-2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="m19 6-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></symbol><symbol id="uxi-alert-circle" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol><symbol id="uxi-alert-triangle" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol><symbol id="uxi-info" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol><symbol id="uxi-check-circle" viewBox="0 0 24 24"><path d="M22 11.1V12a10 10 0 1 1-5.9-9.1"/><path d="M22 4 12 14.1l-3-3"/></symbol><symbol id="uxi-play" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9z"/></symbol><symbol id="uxi-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol><symbol id="uxi-skip-forward" viewBox="0 0 24 24"><path d="M5 4l10 8-10 8zM19 5v14"/></symbol><symbol id="uxi-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19.1 4.9a10 10 0 0 1 0 14.2"/></symbol><symbol id="uxi-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><path d="M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></symbol><symbol id="uxi-mic" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v4"/><path d="M8 23h8"/></symbol><symbol id="uxi-video" viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5z"/><path d="M1 5h15a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H1a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></symbol><symbol id="uxi-map" viewBox="0 0 24 24"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16"/><path d="M16 6v16"/></symbol><symbol id="uxi-map-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><path d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></symbol><symbol id="uxi-compass" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/><path d="M16.2 7.8l-2.1 6.3-6.3 2.1 2.1-6.3z"/></symbol><symbol id="uxi-gift" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></symbol><symbol id="uxi-shopping-cart" viewBox="0 0 24 24"><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/><path d="M9.2 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM19.2 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></symbol><symbol id="uxi-credit-card" viewBox="0 0 24 24"><path d="M1 5h22v14H1z"/><path d="M1 10h22"/></symbol><symbol id="uxi-wallet" viewBox="0 0 24 24"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></symbol><symbol id="uxi-trending-up" viewBox="0 0 24 24"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></symbol><symbol id="uxi-trending-down" viewBox="0 0 24 24"><path d="M23 18l-9.5-9.5-5 5L1 6"/><path d="M17 18h6v-6"/></symbol><symbol id="uxi-bar-chart" viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></symbol><symbol id="uxi-pie-chart" viewBox="0 0 24 24"><path d="M21.2 15.9A10 10 0 1 1 8 2.8"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></symbol><symbol id="uxi-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol><symbol id="uxi-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol><symbol id="uxi-battery" viewBox="0 0 24 24"><path d="M1 6h16v12H1z"/><path d="M23 10v4"/></symbol><symbol id="uxi-wifi" viewBox="0 0 24 24"><path d="M1 5a16 16 0 0 1 22 0"/><path d="M5 9.5a10 10 0 0 1 14 0"/><path d="M8.5 13.5a5 5 0 0 1 7 0"/><path d="M12 18h.01"/></symbol><symbol id="uxi-bluetooth" viewBox="0 0 24 24"><path d="M6.5 6.5 17.5 17.5 12 23V1l5.5 5.5L6.5 17.5"/></symbol><symbol id="uxi-smartphone" viewBox="0 0 24 24"><path d="M5 2h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M12 18h.01"/></symbol><symbol id="uxi-monitor" viewBox="0 0 24 24"><path d="M2 3h20v14H2z"/><path d="M8 21h8"/><path d="M12 17v4"/></symbol><symbol id="uxi-tablet" viewBox="0 0 24 24"><path d="M4 2h16a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M12 18h.01"/></symbol><symbol id="uxi-gamepad" viewBox="0 0 24 24"><path d="M6 12h4"/><path d="M8 10v4"/><path d="M15 11h.01"/><path d="M18 13h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3L2 14v5a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1h12v1a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-5l-.8-6a4 4 0 0 0-3.9-3z"/></symbol><symbol id="uxi-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.7V17c0 .6-.5 1-1 1.2C7.7 19 6 20.2 6 22h12c0-1.8-1.7-3-3-3.8-.5-.2-1-.6-1-1.2v-2.3"/><path d="M18 2H6v7a6 6 0 0 0 12 0z"/></symbol><symbol id="uxi-crown" viewBox="0 0 24 24"><path d="M2 18h20"/><path d="M4 18 2 8l5.5 4L12 4l4.5 8L22 8l-2 10"/></symbol><symbol id="uxi-sword" viewBox="0 0 24 24"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/></symbol><symbol id="uxi-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol><symbol id="uxi-axe" viewBox="0 0 24 24"><path d="M14 4l6 6-8 8-6-6z"/><path d="M4 20l4-4"/><path d="M2 22l3-3"/></symbol><symbol id="uxi-bow" viewBox="0 0 24 24"><path d="M17 4a10 10 0 1 0 0 16"/><path d="M17 4 7 20"/><path d="M14 12h.01"/></symbol><symbol id="uxi-magic" viewBox="0 0 24 24"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h0"/><path d="M17.8 6.2 19 5"/><path d="M12.2 6.2 11 5"/><path d="M4 22l6-6"/><path d="M18 16l2-2"/><path d="M6 8l2-2"/></symbol><symbol id="uxi-potion" viewBox="0 0 24 24"><path d="M10 2h4"/><path d="M12 2v6.5a2 2 0 0 1-.3 1L5 21a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-6.7-11.5a2 2 0 0 1-.3-1V2"/><path d="M8 15h8"/></symbol><symbol id="uxi-flask" viewBox="0 0 24 24"><path d="M9 2h6"/><path d="M10 2v6.3L4.2 18a2 2 0 0 0 1.7 3h12.2a2 2 0 0 0 1.7-3L14 8.3V2"/><path d="M7.5 16h9"/></symbol><symbol id="uxi-gem" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></symbol><symbol id="uxi-coin" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/><path d="M12 6v12"/><path d="M15 9.5a2.5 2.5 0 0 0-2.5-1.5c-1.4 0-2.5.7-2.5 2s1.1 1.8 2.5 2 2.5.7 2.5 2-1.1 2-2.5 2A2.5 2.5 0 0 1 10 16"/></symbol><symbol id="uxi-coins" viewBox="0 0 24 24"><path d="M12 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"/><path d="M18 8.5A6 6 0 0 0 12 4"/><path d="M6 16v2a6 6 0 0 0 12 0v-2"/></symbol><symbol id="uxi-bag" viewBox="0 0 24 24"><path d="M6 7h12l1 14H5z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></symbol><symbol id="uxi-backpack" viewBox="0 0 24 24"><path d="M4 10h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/><path d="M12 14v3"/></symbol><symbol id="uxi-package" viewBox="0 0 24 24"><path d="M21 8v8a2 2 0 0 1-1 1.7l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 16V8a2 2 0 0 1 1-1.7l7-4a2 2 0 0 1 2 0l7 4A2 2 0 0 1 21 8z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></symbol><symbol id="uxi-swords" viewBox="0 0 24 24"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/><path d="M9.5 17.5 21 6V3h-3L9.5 14.5"/><path d="M11 19l-6-6"/><path d="M8 16l-4 4"/><path d="M5 21l-2-2"/></symbol><symbol id="uxi-skull" viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8c0 3 1.5 5 3 6.5V22h10v-5.5c1.5-1.5 3-3.5 3-6.5a8 8 0 0 0-8-8z"/><path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 17v3"/><path d="M14 17v3"/></symbol><symbol id="uxi-ghost" viewBox="0 0 24 24"><path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/></symbol><symbol id="uxi-dragon" viewBox="0 0 24 24"><path d="M12 2c-2 3-2 5 0 7 3-1 5-1 7 1-2 1-3 2-3 4 2 0 4 1 5 3-3 0-5 1-6 3-1-2-3-3-6-3 1-2 2-3 4-4 0-2-1-3-3-4 2-2 3-4 2-7z"/><path d="M9 12h.01"/></symbol><symbol id="uxi-castle" viewBox="0 0 24 24"><path d="M4 22V10l2-2V6h3v2h2V6h2v2h2V6h3v2l2 2v12z"/><path d="M10 22v-5h4v5"/></symbol><symbol id="uxi-tower" viewBox="0 0 24 24"><path d="M8 22V8l4-4 4 4v14z"/><path d="M10 12h4"/><path d="M10 16h4"/><path d="M12 22v-4"/></symbol><symbol id="uxi-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol><symbol id="uxi-target" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"/><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></symbol><symbol id="uxi-crosshair" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/><path d="M22 12h-4"/><path d="M6 12H2"/><path d="M12 6V2"/><path d="M12 22v-4"/></symbol><symbol id="uxi-anchor" viewBox="0 0 24 24"><path d="M12 2v4"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/><path d="M12 22a4 4 0 0 0 0-8 4 4 0 0 0 0 8z"/></symbol><symbol id="uxi-rocket" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1-.1-2.9s-2.1-.7-2.9-.1z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.9A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.6-3.3 2-4c1.6-.8 5 0 5 0"/><path d="M12 15v5s3.3-.6 4-2c.8-1.6 0-5 0-5"/></symbol><symbol id="uxi-planet" viewBox="0 0 24 24"><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/><path d="M18.9 6.3A10 10 0 1 0 21 12"/><path d="M18.4 2.7A10 10 0 1 1 12.3 21.5"/></symbol><symbol id="uxi-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></symbol><symbol id="uxi-sun" viewBox="0 0 24 24"><path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"/><path d="M12 1v2"/><path d="M12 21v2"/><path d="M4.2 4.2l1.4 1.4"/><path d="M18.4 18.4l1.4 1.4"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="M4.2 19.8l1.4-1.4"/><path d="M18.4 5.6l1.4-1.4"/></symbol><symbol id="uxi-cloud" viewBox="0 0 24 24"><path d="M18 10h-1.3A8 8 0 1 0 4 16.3"/></symbol><symbol id="uxi-umbrella" viewBox="0 0 24 24"><path d="M23 12a11 11 0 0 0-22 0z"/><path d="M12 12v7a2 2 0 0 0 4 0"/></symbol><symbol id="uxi-coffee" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/><path d="M6 1v3"/><path d="M10 1v3"/><path d="M14 1v3"/></symbol><symbol id="uxi-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol><symbol id="uxi-bookmark" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol><symbol id="uxi-graduation-cap" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></symbol><symbol id="uxi-briefcase" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol><symbol id="uxi-clipboard" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 2h6v4H9z"/></symbol><symbol id="uxi-list" viewBox="0 0 24 24"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></symbol><symbol id="uxi-grid" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/></symbol><symbol id="uxi-layers" viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></symbol><symbol id="uxi-copy" viewBox="0 0 24 24"><path d="M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="uxi-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol><symbol id="uxi-external-link" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></symbol><symbol id="uxi-maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></symbol><symbol id="uxi-minimize" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></symbol><symbol id="uxi-more-horizontal" viewBox="0 0 24 24"><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/><path d="M19 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/><path d="M5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></symbol><symbol id="uxi-more-vertical" viewBox="0 0 24 24"><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/><path d="M12 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/><path d="M12 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></symbol><symbol id="uxi-menu" viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M3 6h18"/><path d="M3 18h18"/></symbol><symbol id="uxi-sliders" viewBox="0 0 24 24"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M1 14h6"/><path d="M9 8h6"/><path d="M17 16h6"/></symbol><symbol id="uxi-power" viewBox="0 0 24 24"><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/><path d="M12 2v10"/></symbol><symbol id="uxi-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></symbol><symbol id="uxi-log-in" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></symbol><symbol id="uxi-user-plus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><path d="M8.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M20 8v6"/><path d="M23 11h-6"/></symbol><symbol id="uxi-user-check" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><path d="M8.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M17 11l2 2 4-4"/></symbol><symbol id="uxi-message-circle" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 8.4-9 8.5 8.5 0 0 1 8.6 9z"/></symbol><symbol id="uxi-message-square" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="uxi-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.5 2.8.7a2 2 0 0 1 1.7 2z"/></symbol><symbol id="uxi-sunrise" viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"/><path d="M12 2v7"/><path d="M4.2 10.2l1.4 1.4"/><path d="M1 18h2"/><path d="M21 18h2"/><path d="M18.4 11.6l1.4-1.4"/><path d="M23 22H1"/><path d="M8 6l4-4 4 4"/></symbol><symbol id="uxi-droplet" viewBox="0 0 24 24"><path d="M12 2.7 6.3 8.4a8 8 0 1 0 11.4 0z"/></symbol><symbol id="uxi-feather" viewBox="0 0 24 24"><path d="M20.2 4.8A12 12 0 0 0 5 19.2L2 22l2.8-3a12 12 0 0 0 15.4-14.2z"/><path d="M16 8 8 16"/><path d="M12 12h.01"/></symbol><symbol id="uxi-aperture" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"/><path d="M14.3 4.3 20.2 14.6"/><path d="M9.7 4.3 3.8 14.6"/><path d="M12 2v4.6"/><path d="M21.3 16.5 15 12.8"/><path d="M12 22v-4.6"/><path d="M2.7 16.5 9 12.8"/></symbol><symbol id="uxi-sun-dim" viewBox="0 0 24 24"><path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"/><path d="M12 1v2"/><path d="M12 21v2"/><path d="M4.2 4.2l1.4 1.4"/><path d="M18.4 18.4l1.4 1.4"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="M4.2 19.8l1.4-1.4"/><path d="M18.4 5.6l1.4-1.4"/></symbol><symbol id="uxi-loader" viewBox="0 0 24 24"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.9 4.9l2.8 2.8"/><path d="M16.3 16.3l2.8 2.8"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.9 19.1l2.8-2.8"/><path d="M16.3 7.7l2.8-2.8"/></symbol><symbol id="uxi-sparkles" viewBox="0 0 24 24"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/><path d="M5 15l.9 2.1L8 18l-2.1.9L5 21l-.9-2.1L2 18l2.1-.9z"/></symbol><symbol id="uxi-palette" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 1 0-20c5.5 0 10 4 10 9 0 2.5-2 4-4 4h-2a2 2 0 0 0-1.4 3.4A2 2 0 0 1 12 22z"/><path d="M7.5 10.5h.01"/><path d="M12 7.5h.01"/><path d="M16.5 10.5h.01"/></symbol></svg>
 <div class="ux-stage">
-  <div class="ux-frame" id="ux-app" data-title="星穹旅人" data-initial="home" data-demo-hp="1" data-demo-toast="1" data-render="hi">
+  <div class="ux-frame" id="ux-app" data-title="星穹旅人" data-initial="home" data-orientation="portrait" data-demo-hp="1" data-demo-toast="1" data-render="hi">
 
 
 <div class="ux-screens">
 <section class="ux-screen" data-screen="home" data-title="主城">
-<header class="ux-titlebar"><button class="ux-titlebar__back" data-act="back" aria-label="返回"><svg class="ux-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-chevron-left"/></svg></button><h1 class="ux-titlebar__title">主城</h1><div class="ux-titlebar__side"></div></header><div class="ux-currency"><span class="ux-currency__item"><span class="icon">💰</span><span>12.4K</span><button class="ux-currency__plus" data-act="toast" data-toast="打开金币充值" aria-label="增加">+</button></span><span class="ux-currency__item"><span class="icon">💎</span><span>860</span><button class="ux-currency__plus" data-act="toast" data-toast="打开钻石充值" aria-label="增加">+</button></span><span class="ux-currency__item"><span class="icon">⚡</span><span>88/100</span></span></div><div class="ux-scroll">
-<div class="ux-player"><div class="ux-player__avatar">🧝</div><div class="ux-player__meta"><div><span class="ux-player__name">旅人</span><span class="ux-player__level">Lv.28</span></div><div class="ux-player__exp"><i data-value="0.62"></i></div></div></div>
-<button class="ux-gacha" type="button" data-goto="battle"><span class="ux-gacha__star" aria-hidden="true">🌟</span><h3 class="ux-gacha__title">限定祈愿 · 星穹</h3><p class="ux-gacha__sub">距结束 2天 04时 · 保底 42/80</p><span class="ux-gacha__cta">前往祈愿</span></button>
-<div class="ux-grid" data-cols="3"><button class="ux-tile" data-goto="battle">⚔️<span class="ux-tile__title">出征</span><span class="ux-tile__sub">主线 12-3</span></button>
-<button class="ux-tile" data-act="toast" data-toast="探索功能演示中">🗺️<span class="ux-tile__title">探索</span></button>
-<button class="ux-tile" data-act="toast" data-toast="商店功能演示中">🏪<span class="ux-tile__title">商店</span></button>
-<button class="ux-tile" data-act="toast" data-toast="公会功能演示中">👥<span class="ux-tile__title">公会</span></button>
-<button class="ux-tile" data-act="toast" data-toast="任务功能演示中">📜<span class="ux-tile__title">任务</span></button>
-<button class="ux-tile" data-act="modal" data-toast="设置">⚙️<span class="ux-tile__title">设置</span></button></div>
-<aside class="ux-note"><strong><svg class="ux-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-info"/></svg> 策划注</strong> · 主城为默认首页；底部 Dock 与出征按钮均可进入战斗演示。</aside>
+<header class="ux-titlebar"><button class="ux-titlebar__back" data-act="back" aria-label="返回"><svg class="ux-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-chevron-left"/></svg></button><h1 class="ux-titlebar__title">主城</h1><div class="ux-titlebar__side"></div></header><div class="ux-currency"><button type="button" class="ux-currency__item" data-act="modal" data-modal-title="金币" data-modal-body="通用货币
+副本掉落
+出售装备" data-modal-ok="去获取" data-modal-icon="coin"><span class="icon"><svg class="ux-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-coin"/></svg></span><span>12.4K</span><button class="ux-currency__plus" data-act="modal" data-modal-title="金币 · 获取途径" data-modal-body="商店 / 活动 / 任务" data-modal-ok="知道了" aria-label="增加">+</button></button><button type="button" class="ux-currency__item" data-act="modal" data-modal-title="钻石" data-modal-body="稀有货币
+
+· 首充双倍
+· 月卡每日" data-modal-ok="去充值" data-modal-icon="gem"><span class="icon"><svg class="ux-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-gem"/></svg></span><span>860</span><button class="ux-currency__plus" data-act="modal" data-modal-title="钻石 · 获取途径" data-modal-body="商店 / 活动 / 任务" data-modal-ok="知道了" aria-label="增加">+</button></button><button type="button" class="ux-currency__item" data-act="modal" data-modal-title="体力" data-modal-body="每 5 分钟回复 1 点" data-modal-ok="知道了" data-modal-icon="zap"><span class="icon"><svg class="ux-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-zap"/></svg></span><span>88/100</span></button></div><div class="ux-scroll">
+<div class="ux-player"><div class="ux-player__avatar"><svg class="ux-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-user"/></svg></div><div class="ux-player__meta"><div><span class="ux-player__name">旅人</span><span class="ux-player__level">Lv.28</span></div><div class="ux-player__exp"><i data-value="0.62"></i></div></div></div>
+<button class="ux-gacha" type="button" data-goto="battle"><span class="ux-gacha__star" aria-hidden="true"><svg class="ux-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-sparkles"/></svg></span><h3 class="ux-gacha__title">限定祈愿 · 星穹</h3><p class="ux-gacha__sub">保底 42/80</p><span class="ux-gacha__cta">前往祈愿</span></button>
+<div class="ux-grid" data-cols="3"><button class="ux-tile" data-goto="battle"><svg class="ux-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-swords"/></svg><span class="ux-tile__title">出征</span></button>
+<button class="ux-tile" data-act="modal" data-modal-title="探索" data-modal-body="主线 12-3 解锁中" data-modal-ok="知道了" data-modal-icon="map"><svg class="ux-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-map"/></svg><span class="ux-tile__title">探索</span></button>
+<button class="ux-tile" data-act="modal" data-modal-title="商店" data-modal-body="每日刷新 3 件折扣" data-modal-ok="去看看" data-modal-icon="shopping-cart"><svg class="ux-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-shopping-cart"/></svg><span class="ux-tile__title">商店</span></button>
+<button class="ux-tile" data-act="modal" data-modal-title="公会" data-modal-body="今日签到 +20 贡献" data-modal-ok="确定" data-modal-icon="users"><svg class="ux-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-users"/></svg><span class="ux-tile__title">公会</span></button>
+<button class="ux-tile" data-act="modal" data-modal-title="任务" data-modal-body="日常 3/5 · 周常 1/3" data-modal-ok="确定" data-modal-icon="clipboard"><svg class="ux-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-clipboard"/></svg><span class="ux-tile__title">任务</span></button>
+<button class="ux-tile" data-act="modal" data-modal-title="设置" data-modal-body="音效 / 画质 / 账号" data-modal-ok="确定" data-modal-icon="settings"><svg class="ux-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-settings"/></svg><span class="ux-tile__title">设置</span></button></div>
 </div>
 </section>
 <section class="ux-screen" data-screen="battle" data-title="战斗">
 <header class="ux-titlebar"><button class="ux-titlebar__back" data-act="back" aria-label="返回"><svg class="ux-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-chevron-left"/></svg></button><h1 class="ux-titlebar__title">战斗</h1><div class="ux-titlebar__side"></div></header><div class="ux-scroll">
 <div class="ux-hp" data-tone="ok" data-side="left"><div class="ux-hp__head"><span>幼龙 · Lv.15</span><span>100 / 100</span></div><div class="ux-hp__track"><div class="ux-hp__fill" data-value="1" data-demo-drain style="width:100%"></div></div></div>
 <div class="ux-hp" data-tone="ok" data-side="left"><div class="ux-hp__head"><span>旅人</span><span>86 / 100</span></div><div class="ux-hp__track"><div class="ux-hp__fill" data-value="0.86" data-demo-drain style="width:86%"></div></div></div>
-<section class="ux-hero"><div class="ux-hero__motif" aria-hidden="true">🐉</div><h2 class="ux-hero__title">回合制演示</h2><p class="ux-hero__sub">点击技能按钮查看反馈</p></section>
-<div class="ux-skills"><button class="ux-skill" data-act="skill" data-name="炎刃" data-cd=""><span class="ux-skill__cost">12</span><span class="ux-skill__icon">🔥</span><span class="ux-skill__name">炎刃</span></button><button class="ux-skill" data-act="skill" data-name="冰封" data-cd=""><span class="ux-skill__cost">18</span><span class="ux-skill__icon">❄️</span><span class="ux-skill__name">冰封</span></button><button class="ux-skill" data-act="skill" data-name="奥义" data-cd=""><span class="ux-skill__cost">40</span><span class="ux-skill__icon">✨</span><span class="ux-skill__name">奥义</span></button><button class="ux-skill" data-act="skill" data-name="防御" data-cd=""><span class="ux-skill__cost">0</span><span class="ux-skill__icon">🛡️</span><span class="ux-skill__name">防御</span></button></div>
+<section class="ux-hero"><div class="ux-hero__motif" aria-hidden="true"><svg class="ux-icon" width="84" height="84" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-dragon"/></svg></div><h2 class="ux-hero__title">回合演示</h2><p class="ux-hero__sub">点技能查看反馈</p></section>
+<div class="ux-skills"><button class="ux-skill" data-act="skill" data-name="炎刃" data-cd="3"><span class="ux-skill__cost">12</span><span class="ux-skill__icon"><svg class="ux-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-zap"/></svg></span><span class="ux-skill__name">炎刃</span></button><button class="ux-skill" data-act="skill" data-name="冰封" data-cd=""><span class="ux-skill__cost">18</span><span class="ux-skill__icon"><svg class="ux-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-droplet"/></svg></span><span class="ux-skill__name">冰封</span></button><button class="ux-skill" data-act="skill" data-name="奥义" data-cd=""><span class="ux-skill__cost">40</span><span class="ux-skill__icon"><svg class="ux-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-sparkles"/></svg></span><span class="ux-skill__name">奥义</span></button><button class="ux-skill" data-act="skill" data-name="防御" data-cd=""><span class="ux-skill__cost">0</span><span class="ux-skill__icon"><svg class="ux-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-shield"/></svg></span><span class="ux-skill__name">防御</span></button></div>
 <div class="ux-stick" aria-hidden="true"><div class="ux-stick__pad"></div><div class="ux-stick__btns"><span class="ux-stick__abtn">✕</span><span class="ux-stick__abtn ux-stick__abtn--main">⚔️</span></div></div>
-<div class="ux-buttons"><button class="ux-btn ux-btn--primary" data-act="toast" data-toast="已开启自动战斗">自动战斗</button>
-<button class="ux-btn ux-btn--ghost" data-goto="home">返回主城</button></div>
+<div class="ux-buttons"><button class="ux-btn ux-btn--primary" data-act="toast" data-toast="自动战斗"><svg class="ux-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-play"/></svg>自动</button>
+<button class="ux-btn ux-btn--ghost" data-goto="home"><svg class="ux-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-arrow-left"/></svg>返回</button></div>
 </div>
 </section>
 <section class="ux-screen" data-screen="bag" data-title="背包">
 <header class="ux-titlebar"><button class="ux-titlebar__back" data-act="back" aria-label="返回"><svg class="ux-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-chevron-left"/></svg></button><h1 class="ux-titlebar__title">背包</h1><div class="ux-titlebar__side"></div></header><div class="ux-scroll">
-<div class="ux-seg" role="tablist"><button class="ux-seg__item is-active" type="button">全部</button><button class="ux-seg__item" type="button">装备</button><button class="ux-seg__item" type="button">材料</button><button class="ux-seg__item" type="button">限定</button></div>
-<div class="ux-inv"><button class="ux-inv__slot" data-rarity="legend" data-act="toast" data-toast="苍穹之刃"><span class="ux-inv__icon">🗡️</span><span class="ux-inv__qty">1</span></button><button class="ux-inv__slot" data-rarity="epic" data-act="toast" data-toast="星辉盾"><span class="ux-inv__icon">🛡️</span><span class="ux-inv__qty">1</span></button><button class="ux-inv__slot" data-rarity="common" data-act="toast" data-toast="治疗药水"><span class="ux-inv__icon">🧪</span><span class="ux-inv__qty">24</span></button><button class="ux-inv__slot" data-rarity="rare" data-act="toast" data-toast="强化石"><span class="ux-inv__icon">💎</span><span class="ux-inv__qty">6</span></button><button class="ux-inv__slot" data-rarity="epic" data-act="toast" data-toast="技能书"><span class="ux-inv__icon">📖</span><span class="ux-inv__qty">1</span></button><button class="ux-inv__slot" data-rarity="common" data-act="toast" data-toast="烤肉"><span class="ux-inv__icon">🍖</span><span class="ux-inv__qty">12</span></button><button class="ux-inv__slot" data-rarity="rare" data-act="toast" data-toast="秘境钥匙"><span class="ux-inv__icon">🔑</span><span class="ux-inv__qty">2</span></button><button class="ux-inv__slot" data-rarity="epic" data-act="toast" data-toast="限定头像框"><span class="ux-inv__icon">🎀</span><span class="ux-inv__qty">1</span></button></div>
-<aside class="ux-note"><strong><svg class="ux-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-info"/></svg> 策划注</strong> · 点击格子会弹出道具 Toast；边框颜色对应稀有度。</aside>
+<div class="ux-seg" role="tablist"><button class="ux-seg__item is-active" type="button">全部</button><button class="ux-seg__item" type="button">装备</button><button class="ux-seg__item" type="button">材料</button></div>
+<div class="ux-inv"><button class="ux-inv__slot" data-rarity="legend" data-act="modal" data-modal-title="苍穹之刃" data-modal-body="攻击 +128 · 暴击 12%
+
+· 强化
+· 穿戴" data-modal-ok="穿戴" data-modal-icon="sword"><span class="ux-inv__icon"><svg class="ux-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-sword"/></svg></span><span class="ux-inv__qty">1</span></button><button class="ux-inv__slot" data-rarity="epic" data-act="modal" data-modal-title="星辉盾" data-modal-body="防御 +64" data-modal-ok="关闭" data-modal-icon="shield"><span class="ux-inv__icon"><svg class="ux-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-shield"/></svg></span><span class="ux-inv__qty">1</span></button><button class="ux-inv__slot" data-rarity="common" data-act="modal" data-modal-title="治疗药水" data-modal-body="回复 30% HP" data-modal-ok="关闭" data-modal-icon="flask"><span class="ux-inv__icon"><svg class="ux-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-flask"/></svg></span><span class="ux-inv__qty">24</span></button><button class="ux-inv__slot" data-rarity="rare" data-act="modal" data-modal-title="强化石" data-modal-body="装备强化材料" data-modal-ok="关闭" data-modal-icon="gem"><span class="ux-inv__icon"><svg class="ux-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-gem"/></svg></span><span class="ux-inv__qty">6</span></button><button class="ux-inv__slot" data-rarity="epic" data-act="modal" data-modal-title="技能书" data-modal-body="随机技能升级" data-modal-ok="关闭" data-modal-icon="book"><span class="ux-inv__icon"><svg class="ux-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-book"/></svg></span><span class="ux-inv__qty">1</span></button><button class="ux-inv__slot" data-rarity="common" data-act="modal" data-modal-title="烤肉" data-modal-body="体力 +20" data-modal-ok="关闭" data-modal-icon="coffee"><span class="ux-inv__icon"><svg class="ux-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-coffee"/></svg></span><span class="ux-inv__qty">12</span></button><button class="ux-inv__slot" data-rarity="rare" data-act="modal" data-modal-title="秘境钥匙" data-modal-body="开启限时秘境" data-modal-ok="关闭" data-modal-icon="unlock"><span class="ux-inv__icon"><svg class="ux-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-unlock"/></svg></span><span class="ux-inv__qty">2</span></button><button class="ux-inv__slot" data-rarity="epic" data-act="modal" data-modal-title="头像框" data-modal-body="限定装扮" data-modal-ok="关闭" data-modal-icon="gift"><span class="ux-inv__icon"><svg class="ux-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-gift"/></svg></span><span class="ux-inv__qty">1</span></button></div>
 </div>
 </section>
 <section class="ux-screen" data-screen="rank" data-title="排行榜">
 <header class="ux-titlebar"><button class="ux-titlebar__back" data-act="back" aria-label="返回"><svg class="ux-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-chevron-left"/></svg></button><h1 class="ux-titlebar__title">排行榜</h1><div class="ux-titlebar__side"></div></header><div class="ux-scroll">
-<div class="ux-seg" role="tablist"><button class="ux-seg__item is-active" type="button">战力榜</button><button class="ux-seg__item" type="button">公会榜</button><button class="ux-seg__item" type="button">本周</button></div>
+<div class="ux-seg" role="tablist"><button class="ux-seg__item is-active" type="button">战力</button><button class="ux-seg__item" type="button">公会</button><button class="ux-seg__item" type="button">本周</button></div>
 <div class="ux-rank"><div class="ux-rank__item"><span class="ux-rank__no">1</span><span class="ux-rank__name">夜翼</span><span class="ux-rank__score">98,420</span></div><div class="ux-rank__item"><span class="ux-rank__no">2</span><span class="ux-rank__name">青雀</span><span class="ux-rank__score">95,110</span></div><div class="ux-rank__item"><span class="ux-rank__no">3</span><span class="ux-rank__name">Kuro</span><span class="ux-rank__score">91,003</span></div><div class="ux-rank__item is-me"><span class="ux-rank__no">4</span><span class="ux-rank__name">旅人（我）</span><span class="ux-rank__score">88,250</span></div><div class="ux-rank__item"><span class="ux-rank__no">5</span><span class="ux-rank__name">阿茶</span><span class="ux-rank__score">86,001</span></div></div>
 </div>
 </section>
 </div>
-<nav class="ux-tabbar" aria-label="主导航"><button class="ux-tabbar__item" data-goto-tab="home" type="button"><span class="icon">🏰</span><span>主城</span></button><button class="ux-tabbar__item" data-goto-tab="battle" type="button"><span class="icon">⚔️</span><span>冒险</span></button><button class="ux-tabbar__item" data-goto-tab="bag" type="button"><span class="icon">🎒</span><span>背包</span></button><button class="ux-tabbar__item" data-goto-tab="rank" type="button"><span class="icon">🏆</span><span>排行</span></button></nav>
-<footer class="ux-footnote">示例：主城 → 出征 → 战斗；底部 Dock 可切换背包/排行</footer>
+<nav class="ux-tabbar" aria-label="主导航"><button class="ux-tabbar__item" data-goto-tab="home" type="button"><span class="icon"><svg class="ux-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-castle"/></svg></span><span>主城</span></button><button class="ux-tabbar__item" data-goto-tab="battle" type="button"><span class="icon"><svg class="ux-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-swords"/></svg></span><span>冒险</span></button><button class="ux-tabbar__item" data-goto-tab="bag" type="button"><span class="icon"><svg class="ux-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-backpack"/></svg></span><span>背包</span></button><button class="ux-tabbar__item" data-goto-tab="rank" type="button"><span class="icon"><svg class="ux-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#uxi-trophy"/></svg></span><span>排行</span></button></nav>
+
 <div class="ux-modal" role="dialog" aria-modal="true" aria-hidden="true">
   <div class="ux-modal__panel">
-    <h3 class="ux-modal__title">提示</h3>
-    <p class="ux-modal__body"></p>
-    <div class="ux-modal__actions">
+  <div class="ux-modal__head">
+    <div class="ux-modal__icon" hidden></div>
+    <h3 class="ux-modal__title">详情</h3>
+  </div>
+  <p class="ux-modal__body"></p>
+  <div class="ux-modal__actions">
       <button class="ux-btn" data-modal-close type="button">取消</button>
       <button class="ux-btn ux-btn--primary" data-modal-ok type="button">确定</button>
     </div>
@@ -1921,6 +2716,42 @@ a { color: var(--ux-primary); text-decoration: none; }
 
   function $(sel, root) { return (root || doc).querySelector(sel); }
   function $$(sel, root) { return Array.prototype.slice.call((root || doc).querySelectorAll(sel)); }
+
+  /* ── 屏幕方向 ───────────────────────────────── */
+  var orientationPolicy = doc.documentElement.getAttribute("data-orientation") || "portrait";
+
+  function currentOrientation() {
+    if (orientationPolicy === "auto") {
+      return window.matchMedia && window.matchMedia("(orientation: landscape)").matches ? "landscape" : "portrait";
+    }
+    return orientationPolicy === "landscape" ? "landscape" : "portrait";
+  }
+
+  function applyOrientation() {
+    var value = currentOrientation();
+    doc.documentElement.setAttribute("data-orientation-view", value);
+    app.setAttribute("data-orientation", value);
+    return value;
+  }
+
+  function setOrientation(value) {
+    if (["portrait", "landscape", "auto"].indexOf(value) === -1) return currentOrientation();
+    orientationPolicy = value;
+    doc.documentElement.setAttribute("data-orientation", value);
+    return applyOrientation();
+  }
+
+  function toggleOrientation() {
+    return setOrientation(currentOrientation() === "landscape" ? "portrait" : "landscape");
+  }
+
+  if (window.matchMedia) {
+    var orientationMedia = window.matchMedia("(orientation: landscape)");
+    var onOrientationChange = function () { if (orientationPolicy === "auto") applyOrientation(); };
+    if (orientationMedia.addEventListener) orientationMedia.addEventListener("change", onOrientationChange);
+    else if (orientationMedia.addListener) orientationMedia.addListener(onOrientationChange);
+  }
+  applyOrientation();
 
   /* ── Tween 引擎 ─────────────────────────────── */
   var Ease = {
@@ -2187,10 +3018,17 @@ a { color: var(--ux-primary); text-decoration: none; }
 
   /* modal */
   var modalEl = $(".ux-modal", app);
-  function openModal(title, body, okLabel, onOk) {
+  function openModal(title, body, okLabel, onOk, iconName) {
     if (!modalEl) { toast(title); return; }
     $(".ux-modal__title", modalEl).textContent = title || "";
-    $(".ux-modal__body", modalEl).textContent = body || "";
+    var bodyEl = $(".ux-modal__body", modalEl);
+    bodyEl.textContent = body || "";
+    bodyEl.style.whiteSpace = body && body.indexOf("\n") >= 0 ? "pre-line" : "";
+    var iconEl = $(".ux-modal__icon", modalEl);
+    if (iconEl) {
+      if (iconName) { iconEl.textContent = iconName; iconEl.hidden = false; }
+      else { iconEl.hidden = true; iconEl.textContent = ""; }
+    }
     var okBtn = $("[data-modal-ok]", modalEl);
     if (okLabel) okBtn.textContent = okLabel;
     modalEl.classList.add("is-open");
@@ -2275,6 +3113,12 @@ a { color: var(--ux-primary); text-decoration: none; }
     }
     if (goto) { go(goto); return; }
     if (act === "back") { e.preventDefault(); back(); return; }
+    if (act === "orientation") {
+      e.preventDefault();
+      var nextOrientation = toggleOrientation();
+      toast(nextOrientation === "landscape" ? "已切换横屏" : "已切换竖屏");
+      return;
+    }
     if (act === "toast") {
       e.preventDefault();
       toast(t.getAttribute("data-toast") || "已触发");
@@ -2288,7 +3132,7 @@ a { color: var(--ux-primary); text-decoration: none; }
     }
     if (act === "modal") {
       e.preventDefault();
-      openModal(t.getAttribute("data-modal-title") || "提示", t.getAttribute("data-modal-body") || "", t.getAttribute("data-modal-ok") || "确定");
+      openModal(t.getAttribute("data-modal-title") || "详情", t.getAttribute("data-modal-body") || "", t.getAttribute("data-modal-ok") || "确定", null, t.getAttribute("data-modal-icon") || "");
       return;
     }
     if (act === "form") {
@@ -2340,7 +3184,819 @@ a { color: var(--ux-primary); text-decoration: none; }
   wireToggles();
   wireStateSwitchers();
 
-  window.UX = { go: go, back: back, toast: toast, tween: tween, count: countTo, seq: seq, ease: Ease, openModal: openModal, closeModal: closeModal };
+  window.UX = { go: go, back: back, toast: toast, tween: tween, count: countTo, seq: seq, ease: Ease, openModal: openModal, closeModal: closeModal, setOrientation: setOrientation, toggleOrientation: toggleOrientation };
+})();
+
+</script>
+<script>
+/* game-core.js — 游戏玩法状态与反馈运行时（构建时内联，零依赖） */
+(function () {
+  "use strict";
+  var doc = document;
+  var app = doc.getElementById("ux-app");
+  if (!app || !window.UX) return;
+
+  function $(sel, root) { return (root || doc).querySelector(sel); }
+  function $$(sel, root) { return Array.prototype.slice.call((root || doc).querySelectorAll(sel)); }
+  function num(value, fallback) { var n = Number(value); return isFinite(n) ? n : (fallback || 0); }
+  function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+  function gameRoot(el) { return el && el.closest ? el.closest("[data-game-root]") : null; }
+  function reducedMotion() { return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+
+  function replay(el, className) {
+    if (!el) return;
+    el.classList.remove(className);
+    void el.offsetWidth;
+    el.classList.add(className);
+  }
+
+  function announce(root, message, showToast) {
+    var log = root ? $("[data-game-log]", root) : null;
+    if (log) log.textContent = message;
+    if (showToast || !log) window.UX.toast(message);
+  }
+
+  function emit(action, source, root) {
+    try {
+      doc.dispatchEvent(new CustomEvent("ux:game", { detail: { action: action, source: source, root: root } }));
+    } catch (e) { /* CustomEvent is optional in older embedded browsers. */ }
+  }
+
+  function floatText(el, text, tone) {
+    if (!el) return;
+    var frameRect = app.getBoundingClientRect();
+    var rect = el.getBoundingClientRect();
+    var label = doc.createElement("span");
+    label.className = "ux-game-float" + (tone ? " ux-game-float--" + tone : "");
+    label.textContent = text;
+    label.style.left = (rect.left - frameRect.left + rect.width / 2) + "px";
+    label.style.top = (rect.top - frameRect.top + Math.min(30, rect.height / 2)) + "px";
+    app.appendChild(label);
+    setTimeout(function () { if (label.parentNode) label.parentNode.removeChild(label); }, reducedMotion() ? 120 : 900);
+  }
+
+  function setHp(unit, value) {
+    if (!unit) return 0;
+    var max = Math.max(1, num(unit.getAttribute("data-max-hp"), 100));
+    var hp = clamp(num(value, 0), 0, max);
+    unit.setAttribute("data-hp", String(hp));
+    var fill = $("[data-hp-fill]", unit);
+    var text = $("[data-hp-text]", unit);
+    var health = $(".ux-unit-health", unit);
+    if (fill) fill.style.width = (hp / max * 100) + "%";
+    if (text) text.textContent = hp + "/" + max;
+    if (health) health.setAttribute("aria-label", "生命 " + hp + " / " + max);
+    unit.classList.toggle("is-dead", hp <= 0);
+    return hp;
+  }
+
+  function changeHp(unit, delta) {
+    if (!unit) return 0;
+    var before = num(unit.getAttribute("data-hp"), 0);
+    var after = setHp(unit, before + delta);
+    var actual = after - before;
+    if (actual) {
+      floatText(unit, (actual > 0 ? "+" : "") + actual, actual > 0 ? "heal" : "damage");
+      replay(unit, actual > 0 ? "anim-heal" : "anim-hit");
+    }
+    return actual;
+  }
+
+  /* ── 头顶道具栏 ─────────────────────────────── */
+  function useItem(button, root) {
+    var qty = Math.max(0, num(button.getAttribute("data-qty"), 0));
+    var name = button.getAttribute("data-item-name") || "道具";
+    if (!qty) { announce(root, name + "已用完", true); return; }
+    qty -= 1;
+    button.setAttribute("data-qty", String(qty));
+    var qtyEl = $("[data-item-qty]", button);
+    if (qtyEl) qtyEl.textContent = String(qty);
+    button.setAttribute("aria-label", name + "，剩余 " + qty);
+    if (!qty) button.disabled = true;
+    var value = num(button.getAttribute("data-value"), 10);
+    var effect = button.getAttribute("data-effect") || "heal";
+    if (effect === "heal") changeHp(root, value);
+    else if (effect === "damage") changeHp(root, -value);
+    else if (effect === "shield") {
+      root.setAttribute("data-shield", String(num(root.getAttribute("data-shield"), 0) + value));
+      floatText(root, "护盾 +" + value, "shield");
+      replay(root, "anim-glow-once");
+    } else {
+      floatText(root, name, "buff");
+      replay(root, "anim-glow-once");
+    }
+    replay(button, "anim-pop");
+    announce(root, "已使用" + name + "，剩余 " + qty);
+  }
+
+  /* ── SLG：选择 → 指令 → 相邻目标 ────────────── */
+  var ownerNames = { player: "己方", enemy: "敌方", neutral: "中立" };
+
+  function slgCells(root) { return $$(".ux-slg__cell", root); }
+  function updateSlgCell(cell) {
+    var power = Math.max(0, num(cell.getAttribute("data-power"), 0));
+    cell.setAttribute("data-power", String(power));
+    var label = cell.getAttribute("data-label") || "地块";
+    var owner = cell.getAttribute("data-owner") || "neutral";
+    var powerEl = $("[data-cell-power]", cell);
+    if (powerEl) powerEl.textContent = String(power);
+    cell.setAttribute("aria-label", label + "，" + (ownerNames[owner] || owner) + "，兵力 " + power);
+  }
+
+  function clearSlgTargets(root) {
+    root._slgCommand = null;
+    root._slgSource = null;
+    root.classList.remove("is-targeting");
+    slgCells(root).forEach(function (cell) { cell.classList.remove("is-target"); });
+    $$('[data-game-act="slg-command"]', root).forEach(function (button) {
+      button.classList.remove("is-active");
+      if (button.getAttribute("data-command") === "cancel") button.disabled = true;
+    });
+  }
+
+  function selectSlg(cell, root) {
+    if (root._slgCommand && cell !== root._slgSource) { resolveSlgTarget(cell, root); return; }
+    clearSlgTargets(root);
+    slgCells(root).forEach(function (item) {
+      item.classList.toggle("is-selected", item === cell);
+      item.setAttribute("aria-selected", item === cell ? "true" : "false");
+    });
+    root._slgSelected = cell;
+    var owner = cell.getAttribute("data-owner") || "neutral";
+    var power = num(cell.getAttribute("data-power"), 0);
+    var label = cell.getAttribute("data-label") || "地块";
+    var selection = $("[data-slg-selection]", root);
+    var detail = $("[data-slg-detail]", root);
+    if (selection) selection.textContent = label + " · " + (ownerNames[owner] || owner) + " · 兵力 " + power;
+    if (detail) detail.textContent = owner === "player" ? "可侦察，或向相邻地块行军/进攻。" : "可侦察；进攻需先选择相邻的己方地块。";
+    $$('[data-game-act="slg-command"]', root).forEach(function (button) {
+      var command = button.getAttribute("data-command");
+      if (command === "scout") button.disabled = false;
+      if (command === "move" || command === "attack") button.disabled = owner !== "player" || power < 2;
+    });
+    replay(cell, "anim-pop");
+  }
+
+  function slgTargetable(source, target, command) {
+    var distance = Math.abs(num(source.getAttribute("data-x"), 0) - num(target.getAttribute("data-x"), 0)) + Math.abs(num(source.getAttribute("data-y"), 0) - num(target.getAttribute("data-y"), 0));
+    if (distance !== 1) return false;
+    var terrain = target.getAttribute("data-terrain");
+    if (terrain === "water" || terrain === "mountain") return false;
+    var owner = target.getAttribute("data-owner");
+    return command === "attack" ? owner === "enemy" : owner !== "enemy";
+  }
+
+  function commandSlg(button, root) {
+    var command = button.getAttribute("data-command");
+    if (command === "cancel") {
+      clearSlgTargets(root);
+      announce(root, "已取消指令。");
+      return;
+    }
+    var selected = root._slgSelected;
+    if (!selected) { announce(root, "请先选择地块", true); return; }
+    if (command === "scout") {
+      selected.classList.add("is-scouted");
+      replay(selected, "anim-glow-once");
+      var owner = selected.getAttribute("data-owner") || "neutral";
+      announce(root, (selected.getAttribute("data-label") || "地块") + " 侦察完成：" + (ownerNames[owner] || owner) + "，兵力 " + selected.getAttribute("data-power") + "。");
+      return;
+    }
+    if (selected.getAttribute("data-owner") !== "player" || num(selected.getAttribute("data-power"), 0) < 2) {
+      announce(root, "行军与进攻需要至少 2 点兵力的己方地块", true);
+      return;
+    }
+    clearSlgTargets(root);
+    root._slgCommand = command;
+    root._slgSource = selected;
+    root.classList.add("is-targeting");
+    button.classList.add("is-active");
+    var cancel = $('[data-command="cancel"]', root);
+    if (cancel) cancel.disabled = false;
+    slgCells(root).forEach(function (cell) {
+      cell.classList.toggle("is-target", slgTargetable(selected, cell, command));
+    });
+    var detail = $("[data-slg-detail]", root);
+    if (detail) detail.textContent = command === "attack" ? "选择一个高亮的相邻敌方地块。" : "选择一个高亮的相邻可通行地块。";
+    announce(root, command === "attack" ? "进攻模式：请选择相邻敌方目标。" : "行军模式：请选择相邻目标格。");
+  }
+
+  function resolveSlgTarget(target, root) {
+    var source = root._slgSource;
+    var command = root._slgCommand;
+    if (!source || !command) { selectSlg(target, root); return; }
+    if (!slgTargetable(source, target, command)) {
+      announce(root, "目标不相邻或不符合当前指令，请选择高亮地块", true);
+      replay(target, "anim-shake");
+      return;
+    }
+    var sourcePower = num(source.getAttribute("data-power"), 0);
+    var targetPower = num(target.getAttribute("data-power"), 0);
+    if (command === "move") {
+      var amount = Math.max(1, Math.floor(sourcePower / 2));
+      source.setAttribute("data-power", String(sourcePower - amount));
+      target.setAttribute("data-power", String(targetPower + amount));
+      if (target.getAttribute("data-owner") === "neutral") target.setAttribute("data-owner", "player");
+      updateSlgCell(source);
+      updateSlgCell(target);
+      floatText(source, "-" + amount, "damage");
+      floatText(target, "+" + amount, "heal");
+      replay(target, "anim-land");
+      announce(root, "已调动 " + amount + " 点兵力至 " + target.getAttribute("data-label") + "。");
+    } else {
+      var damage = Math.min(targetPower, Math.max(1, Math.ceil(sourcePower / 2)));
+      var loss = Math.min(sourcePower - 1, Math.max(1, Math.floor(targetPower / 3)));
+      source.setAttribute("data-power", String(sourcePower - loss));
+      target.setAttribute("data-power", String(targetPower - damage));
+      if (targetPower - damage <= 0) target.setAttribute("data-owner", "neutral");
+      updateSlgCell(source);
+      updateSlgCell(target);
+      floatText(target, "-" + damage, "damage");
+      replay(source, "anim-lunge");
+      replay(target, "anim-hit");
+      announce(root, "进攻结算：敌方损失 " + damage + "，己方损失 " + loss + (targetPower - damage <= 0 ? "；守军已溃散，可行军占领。" : "。"));
+    }
+    clearSlgTargets(root);
+    selectSlg(source, root);
+  }
+
+  function endSlgTurn(root) {
+    clearSlgTargets(root);
+    var turn = num(root.getAttribute("data-turn"), 1) + 1;
+    root.setAttribute("data-turn", String(turn));
+    var turnEl = $("[data-slg-turn]", root);
+    if (turnEl) { turnEl.textContent = String(turn); turnEl.setAttribute("data-ux-turn", String(turn)); }
+    announce(root, "第 " + turn + " 回合：行军与攻击指令已就绪。");
+  }
+
+  /* ── 卡牌战斗：手牌、目标、费用、回合 ────────── */
+  function cardHand(root) { return $("[data-ux-hand]", root); }
+  function handCards(root) { var hand = cardHand(root); return hand ? $$("[data-ux-card]", hand) : []; }
+  function livingEnemies(root) {
+    return $$(".ux-cardbattle__enemy", root).filter(function (unit) { return num(unit.getAttribute("data-hp"), 0) > 0; });
+  }
+
+  function updateCardEnergy(root) {
+    var energy = Math.max(0, num(root.getAttribute("data-energy"), 0));
+    var max = Math.max(0, num(root.getAttribute("data-max-energy"), 3));
+    var energyEl = $("[data-card-energy]", root);
+    if (energyEl) energyEl.textContent = energy + "/" + max;
+    handCards(root).forEach(function (card) {
+      var unavailable = num(card.getAttribute("data-cost"), 0) > energy;
+      card.classList.toggle("is-disabled", unavailable);
+      card.setAttribute("aria-disabled", unavailable ? "true" : "false");
+    });
+  }
+
+  function selectCard(card, root) {
+    var cost = num(card.getAttribute("data-cost"), 0);
+    var energy = num(root.getAttribute("data-energy"), 0);
+    if (cost > energy) {
+      announce(root, "能量不足：需要 " + cost + "，当前 " + energy, true);
+      replay(card, "anim-shake");
+      return;
+    }
+    handCards(root).forEach(function (item) {
+      item.classList.toggle("is-selected", item === card);
+      item.setAttribute("aria-selected", item === card ? "true" : "false");
+    });
+    var name = $(".ux-game-card__name", card);
+    announce(root, "已选择「" + (name ? name.textContent : "卡牌") + "」，点击「打出卡牌」确认。");
+    replay(card, "anim-pop");
+  }
+
+  function selectCardTarget(target, root) {
+    if (num(target.getAttribute("data-hp"), 0) <= 0) { announce(root, "该目标已被击败", true); return; }
+    $$(".ux-cardbattle__enemy", root).forEach(function (unit) {
+      unit.classList.toggle("is-selected", unit === target);
+      unit.setAttribute("aria-pressed", unit === target ? "true" : "false");
+    });
+    announce(root, "目标：" + (target.getAttribute("data-name") || "敌人") + "。");
+  }
+
+  function checkCardResult(root) {
+    var alive = livingEnemies(root);
+    var selectedAlive = $$(".ux-cardbattle__enemy.is-selected", root).filter(function (unit) { return num(unit.getAttribute("data-hp"), 0) > 0; })[0];
+    if (!selectedAlive) {
+      var nextTarget = alive[0] || null;
+      $$(".ux-cardbattle__enemy", root).forEach(function (unit) {
+        unit.classList.toggle("is-selected", unit === nextTarget);
+        unit.setAttribute("aria-pressed", unit === nextTarget ? "true" : "false");
+      });
+    }
+    if (!alive.length) {
+      root.setAttribute("data-result", "victory");
+      root.classList.add("is-victory");
+      announce(root, "胜利！所有敌方目标均已被击败。");
+      return true;
+    }
+    var player = $("[data-player]", root);
+    if (player && num(player.getAttribute("data-hp"), 0) <= 0) {
+      root.setAttribute("data-result", "defeat");
+      root.classList.add("is-defeat");
+      announce(root, "挑战失败：请调整卡组后重试。", true);
+      return true;
+    }
+    return false;
+  }
+
+  function playCard(root) {
+    if (root.getAttribute("data-result")) { announce(root, "本局已结算", true); return; }
+    var card = handCards(root).filter(function (item) { return item.classList.contains("is-selected"); })[0];
+    if (!card) { announce(root, "请先选择一张手牌", true); return; }
+    var cost = num(card.getAttribute("data-cost"), 0);
+    var energy = num(root.getAttribute("data-energy"), 0);
+    if (cost > energy) { announce(root, "能量不足", true); return; }
+    var targetType = card.getAttribute("data-target") || "enemy";
+    var targets = [];
+    if (targetType === "all") targets = livingEnemies(root);
+    else if (targetType === "self") targets = [$("[data-player]", root)];
+    else {
+      var selected = $$(".ux-cardbattle__enemy.is-selected", root).filter(function (unit) { return num(unit.getAttribute("data-hp"), 0) > 0; })[0];
+      targets = [selected || livingEnemies(root)[0]];
+    }
+    targets = targets.filter(Boolean);
+    if (!targets.length) { announce(root, "没有可用目标", true); return; }
+    var damage = num(card.getAttribute("data-damage"), 0);
+    var heal = num(card.getAttribute("data-heal"), 0);
+    var block = num(card.getAttribute("data-block"), 0);
+    var player = $("[data-player]", root);
+    if (damage) targets.forEach(function (unit) { changeHp(unit, -damage); });
+    if (heal && player) changeHp(player, heal);
+    if (block && player) {
+      player.setAttribute("data-block", String(num(player.getAttribute("data-block"), 0) + block));
+      floatText(player, "护盾 +" + block, "shield");
+      replay(player, "anim-glow-once");
+    }
+    root.setAttribute("data-energy", String(energy - cost));
+    updateCardEnergy(root);
+    var name = $(".ux-game-card__name", card);
+    card.classList.remove("is-selected");
+    card.setAttribute("aria-selected", "false");
+    card.classList.add("is-leaving");
+    setTimeout(function () { if (card.parentNode) card.parentNode.removeChild(card); }, reducedMotion() ? 10 : 240);
+    announce(root, "已打出「" + (name ? name.textContent : "卡牌") + "」，消耗 " + cost + " 点能量。");
+    checkCardResult(root);
+  }
+
+  function drawCard(root, silent) {
+    var hand = cardHand(root);
+    var deck = $("[data-card-deck]", root);
+    if (!hand || !deck || !deck.content.firstElementChild) {
+      if (!silent) announce(root, "牌库已空", true);
+      return false;
+    }
+    if (handCards(root).length >= num(root.getAttribute("data-max-hand"), 7)) {
+      if (!silent) announce(root, "手牌已满", true);
+      return false;
+    }
+    var source = deck.content.firstElementChild;
+    var card = source.cloneNode(true);
+    deck.content.removeChild(source);
+    hand.appendChild(card);
+    replay(card, "anim-deal");
+    var count = $("[data-card-deck-count]", root);
+    if (count) count.textContent = String(deck.content.children.length);
+    updateCardEnergy(root);
+    if (!silent) announce(root, "已抽 1 张牌，牌库剩余 " + deck.content.children.length + " 张。");
+    return true;
+  }
+
+  function endCardTurn(root) {
+    if (root.getAttribute("data-result")) { announce(root, "本局已结算", true); return; }
+    var player = $("[data-player]", root);
+    var attack = livingEnemies(root).reduce(function (sum, unit) { return sum + num(unit.getAttribute("data-attack"), 1); }, 0);
+    var block = player ? num(player.getAttribute("data-block"), 0) : 0;
+    var damage = Math.max(0, attack - block);
+    livingEnemies(root).forEach(function (unit) { replay(unit, "anim-lunge"); });
+    if (player) {
+      player.setAttribute("data-block", "0");
+      if (damage) changeHp(player, -damage);
+      else if (attack) floatText(player, "格挡", "shield");
+    }
+    if (checkCardResult(root)) return;
+    var turn = num(root.getAttribute("data-turn"), 1) + 1;
+    root.setAttribute("data-turn", String(turn));
+    var turnEl = $("[data-card-turn]", root);
+    if (turnEl) { turnEl.textContent = String(turn); turnEl.setAttribute("data-ux-turn", String(turn)); }
+    root.setAttribute("data-energy", root.getAttribute("data-max-energy") || "3");
+    updateCardEnergy(root);
+    drawCard(root, true);
+    announce(root, "第 " + turn + " 回合：敌方造成 " + damage + " 点伤害，能量已恢复并抽 1 张牌。");
+  }
+
+  /* ── 打牌：多选、提示、理牌、出牌 ────────────── */
+  function pokerCards(root) { var hand = $("[data-ux-hand]", root); return hand ? $$("[data-ux-card]", hand) : []; }
+  function availablePoker(root) { return pokerCards(root).filter(function (card) { return !card.disabled && !card.classList.contains("is-leaving"); }); }
+  function selectedPoker(root) { return availablePoker(root).filter(function (card) { return card.classList.contains("is-selected"); }); }
+  function setPokerSelected(card, selected) {
+    card.classList.toggle("is-selected", selected);
+    card.setAttribute("aria-selected", selected ? "true" : "false");
+  }
+  function validPokerSet(cards, rule) {
+    if (!cards.length) return false;
+    if (rule === "single") return cards.length === 1;
+    if (rule === "pair") return cards.length === 2 && cards[0].getAttribute("data-rank") === cards[1].getAttribute("data-rank");
+    return true;
+  }
+
+  function selectPoker(card, root) {
+    if (card.disabled || card.classList.contains("is-leaving")) return;
+    setPokerSelected(card, !card.classList.contains("is-selected"));
+    replay(card, "anim-pop");
+    var count = selectedPoker(root).length;
+    announce(root, count ? "已选择 " + count + " 张牌。" : "已取消选择。");
+  }
+
+  function hintPoker(root) {
+    var cards = availablePoker(root);
+    var rule = root.getAttribute("data-rule") || "free";
+    cards.forEach(function (card) { setPokerSelected(card, false); });
+    var chosen = [];
+    if (rule === "pair") {
+      for (var i = 0; i < cards.length && !chosen.length; i++) {
+        for (var j = i + 1; j < cards.length; j++) {
+          if (cards[i].getAttribute("data-rank") === cards[j].getAttribute("data-rank")) { chosen = [cards[i], cards[j]]; break; }
+        }
+      }
+    } else chosen = cards.slice(0, rule === "single" ? 1 : Math.min(2, cards.length));
+    chosen.forEach(function (card) { setPokerSelected(card, true); replay(card, "anim-deal"); });
+    announce(root, chosen.length ? "已为你选择 " + chosen.length + " 张可出的牌。" : "当前没有符合规则的牌型。", !chosen.length);
+  }
+
+  function sortPoker(root) {
+    var hand = $("[data-ux-hand]", root);
+    if (!hand) return;
+    root._pokerDescending = !root._pokerDescending;
+    var direction = root._pokerDescending ? -1 : 1;
+    availablePoker(root).sort(function (a, b) {
+      var diff = num(a.getAttribute("data-value"), 0) - num(b.getAttribute("data-value"), 0);
+      if (!diff) return String(a.getAttribute("data-suit")).localeCompare(String(b.getAttribute("data-suit"))) * direction;
+      return diff * direction;
+    }).forEach(function (card) { hand.appendChild(card); });
+    announce(root, root._pokerDescending ? "已按牌点从大到小整理。" : "已按牌点从小到大整理。");
+  }
+
+  function advancePokerTurn(root, message) {
+    var opponents = $$("[data-opponent]", root);
+    var opponent = opponents.filter(function (item) { return num(item.getAttribute("data-count"), 0) > 0; })[0];
+    if (opponent) {
+      var remaining = num(opponent.getAttribute("data-count"), 0) - 1;
+      opponent.setAttribute("data-count", String(remaining));
+      var count = $("[data-opponent-count]", opponent);
+      if (count) count.textContent = String(remaining);
+      replay(opponent, "anim-deal");
+    }
+    var turn = num(root.getAttribute("data-turn"), 1) + 1;
+    root.setAttribute("data-turn", String(turn));
+    var turnEl = $("[data-poker-turn]", root);
+    if (turnEl) { turnEl.textContent = String(turn); turnEl.setAttribute("data-ux-turn", String(turn)); }
+    setTimeout(function () { announce(root, message + (opponent ? " 对手跟出 1 张。" : "")); }, reducedMotion() ? 20 : 320);
+  }
+
+  function playPoker(root) {
+    var cards = selectedPoker(root);
+    var rule = root.getAttribute("data-rule") || "free";
+    if (!validPokerSet(cards, rule)) {
+      var message = rule === "pair" ? "对子规则：请选择两张点数相同的牌" : rule === "single" ? "单张规则：请只选择一张牌" : "请先选择要出的牌";
+      announce(root, message, true);
+      return;
+    }
+    var trick = $("[data-poker-trick]", root);
+    if (trick) {
+      trick.textContent = "";
+      var set = doc.createElement("div");
+      set.className = "ux-poker__played-set";
+      cards.forEach(function (card) {
+        var played = card.cloneNode(true);
+        played.removeAttribute("data-game-act");
+        played.removeAttribute("data-ux-card");
+        played.setAttribute("aria-selected", "false");
+        played.disabled = true;
+        played.classList.remove("is-selected");
+        played.classList.add("ux-poker-card--played");
+        set.appendChild(played);
+      });
+      trick.appendChild(set);
+    }
+    var hand = $("[data-ux-hand]", root);
+    cards.forEach(function (card) {
+      setPokerSelected(card, false);
+      card.disabled = true;
+      card.classList.add("is-leaving");
+      setTimeout(function () { if (card.parentNode) card.parentNode.removeChild(card); }, reducedMotion() ? 10 : 220);
+    });
+    var remaining = pokerCards(root).length - cards.length;
+    var count = $("[data-poker-count]", root);
+    if (count) count.textContent = String(remaining);
+    if (!remaining) root.setAttribute("data-result", "victory");
+    advancePokerTurn(root, "已打出 " + cards.length + " 张牌。" + (!remaining ? " 你已出完手牌，获胜！" : ""));
+    if (hand) replay(hand, "anim-glow-once");
+  }
+
+  function passPoker(root) {
+    pokerCards(root).forEach(function (card) { setPokerSelected(card, false); });
+    advancePokerTurn(root, "你选择不出。");
+  }
+
+  /* ── 自走棋：购买、站位、羁绊、升星、回合 ────── */
+  function tacticsSlots(root, zone) {
+    var selector = "[data-ux-slot]" + (zone ? '[data-zone="' + zone + '"]' : "");
+    return $$(selector, root);
+  }
+  function slotUnit(slot) { return slot ? $("[data-ux-unit]", slot) : null; }
+  function tacticsUnits(root, zone, playerOnly) {
+    return tacticsSlots(root, zone).map(slotUnit).filter(function (unit) { return unit && (!playerOnly || unit.getAttribute("data-team") !== "enemy"); });
+  }
+  function updateTacticsSlot(slot) {
+    var unit = slotUnit(slot);
+    slot.classList.toggle("is-occupied", !!unit);
+    var zone = slot.getAttribute("data-zone") === "board" ? "棋盘" : "备战席";
+    slot.setAttribute("aria-label", unit ? (unit.getAttribute("data-name") || "单位") + "，" + zone : zone + "空位 " + (num(slot.getAttribute("data-slot-index"), 0) + 1));
+  }
+
+  function updateTactics(root) {
+    var gold = num(root.getAttribute("data-gold"), 0);
+    var level = num(root.getAttribute("data-level"), 1);
+    var xp = num(root.getAttribute("data-xp"), 0);
+    var xpNext = Math.max(1, num(root.getAttribute("data-xp-next"), 8));
+    var cap = Math.max(1, num(root.getAttribute("data-cap"), level));
+    var turn = num(root.getAttribute("data-turn"), 1);
+    var values = {
+      "[data-tactics-gold]": gold,
+      "[data-tactics-level]": level,
+      "[data-tactics-xp]": xp + "/" + xpNext,
+      "[data-tactics-cap]": tacticsUnits(root, "board", true).length + "/" + cap,
+      "[data-tactics-turn]": turn,
+    };
+    Object.keys(values).forEach(function (selector) {
+      var el = $(selector, root);
+      if (el) el.textContent = String(values[selector]);
+    });
+    var turnEl = $("[data-tactics-turn]", root);
+    if (turnEl) turnEl.setAttribute("data-ux-turn", String(turn));
+    var traits = {};
+    tacticsUnits(root, "board", true).forEach(function (unit) {
+      var trait = unit.getAttribute("data-trait");
+      if (trait) traits[trait] = (traits[trait] || 0) + 1;
+    });
+    $$("[data-trait-chip]", root).forEach(function (chip) {
+      var count = traits[chip.getAttribute("data-trait-chip")] || 0;
+      var countEl = $("[data-trait-count]", chip);
+      var need = countEl ? Math.max(1, num(countEl.getAttribute("data-need"), 2)) : 1;
+      if (countEl) countEl.textContent = count + "/" + need;
+      chip.classList.toggle("is-active", count >= need);
+    });
+    $$(".ux-tactics__offer", root).forEach(function (offer) {
+      var poor = num(offer.getAttribute("data-cost"), 1) > gold;
+      offer.classList.toggle("is-unaffordable", poor);
+      offer.setAttribute("aria-disabled", poor || offer.disabled ? "true" : "false");
+    });
+  }
+
+  function clearTacticsSelection(root) {
+    tacticsSlots(root).forEach(function (slot) { slot.classList.remove("is-selected"); });
+    root._tacticsSelected = null;
+  }
+
+  function combineTactics(root) {
+    var combined = true;
+    var any = false;
+    while (combined) {
+      combined = false;
+      var groups = {};
+      tacticsUnits(root, null, true).forEach(function (unit) {
+        var key = (unit.getAttribute("data-unit-id") || unit.getAttribute("data-name")) + "@" + (unit.getAttribute("data-star") || "1");
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(unit);
+      });
+      var keys = Object.keys(groups);
+      for (var i = 0; i < keys.length; i++) {
+        var group = groups[keys[i]];
+        if (group.length < 3) continue;
+        var keep = group[0];
+        group.slice(1, 3).forEach(function (unit) {
+          var slot = unit.parentNode;
+          if (unit.parentNode) unit.parentNode.removeChild(unit);
+          if (slot && slot.hasAttribute("data-ux-slot")) updateTacticsSlot(slot);
+        });
+        var star = num(keep.getAttribute("data-star"), 1) + 1;
+        keep.setAttribute("data-star", String(star));
+        keep.setAttribute("data-attack", String(Math.ceil(num(keep.getAttribute("data-attack"), 1) * 1.5)));
+        var maxHp = Math.ceil(num(keep.getAttribute("data-max-hp"), 100) * 1.5);
+        keep.setAttribute("data-max-hp", String(maxHp));
+        setHp(keep, maxHp);
+        var stars = $("[data-unit-stars]", keep);
+        if (stars) stars.textContent = "★".repeat(star);
+        replay(keep, "anim-level-up");
+        floatText(keep, star + " 星", "buff");
+        announce(root, "合成成功：" + (keep.getAttribute("data-name") || "棋子") + " 升至 " + star + " 星！");
+        any = true;
+        combined = true;
+        break;
+      }
+    }
+    return any;
+  }
+
+  function selectTacticsSlot(slot, root) {
+    if (root._tacticsBusy) return;
+    var selected = root._tacticsSelected;
+    var unit = slotUnit(slot);
+    if (!selected) {
+      if (!unit || unit.getAttribute("data-team") === "enemy") {
+        announce(root, unit ? "敌方单位不能在准备阶段移动" : "请先选择一个己方棋子", true);
+        return;
+      }
+      root._tacticsSelected = slot;
+      slot.classList.add("is-selected");
+      announce(root, "已选择 " + (unit.getAttribute("data-name") || "棋子") + "，点击目标格移动；再次点击取消。");
+      return;
+    }
+    if (selected === slot) {
+      clearTacticsSelection(root);
+      announce(root, "已取消站位调整。");
+      return;
+    }
+    var moving = slotUnit(selected);
+    var target = slotUnit(slot);
+    if (!moving) { clearTacticsSelection(root); return; }
+    if (target && target.getAttribute("data-team") === "enemy") {
+      announce(root, "不能与敌方单位交换位置", true);
+      return;
+    }
+    var fromBoard = selected.getAttribute("data-zone") === "board";
+    var toBoard = slot.getAttribute("data-zone") === "board";
+    if (!fromBoard && toBoard && !target && tacticsUnits(root, "board", true).length >= num(root.getAttribute("data-cap"), 1)) {
+      announce(root, "人口已满：升级或下阵后再试", true);
+      replay($("[data-tactics-cap]", root), "anim-shake");
+      return;
+    }
+    if (target) selected.appendChild(target);
+    slot.appendChild(moving);
+    updateTacticsSlot(selected);
+    updateTacticsSlot(slot);
+    clearTacticsSelection(root);
+    replay(moving, "anim-land");
+    if (!combineTactics(root)) announce(root, toBoard ? "已上阵并更新站位与羁绊。" : "已下阵至备战席。");
+    updateTactics(root);
+  }
+
+  function buyTactics(offer, root) {
+    if (offer.disabled || root._tacticsBusy) return;
+    var cost = num(offer.getAttribute("data-cost"), 1);
+    var gold = num(root.getAttribute("data-gold"), 0);
+    if (cost > gold) { announce(root, "金币不足，需要 " + cost, true); replay(offer, "anim-shake"); return; }
+    var empty = tacticsSlots(root, "bench").filter(function (slot) { return !slotUnit(slot); })[0];
+    if (!empty) { announce(root, "备战席已满，请先上阵或调整棋子", true); return; }
+    var template = $("[data-unit-template]", offer);
+    if (!template || !template.content.firstElementChild) return;
+    var unit = template.content.firstElementChild.cloneNode(true);
+    empty.appendChild(unit);
+    updateTacticsSlot(empty);
+    root.setAttribute("data-gold", String(gold - cost));
+    offer.disabled = true;
+    offer.classList.add("is-sold");
+    replay(unit, "anim-deal");
+    announce(root, "已购买 " + (unit.getAttribute("data-name") || "棋子") + "，消耗 " + cost + " 金币。");
+    combineTactics(root);
+    updateTactics(root);
+  }
+
+  function refreshTactics(root) {
+    var cost = num(root.getAttribute("data-refresh-cost"), 2);
+    var gold = num(root.getAttribute("data-gold"), 0);
+    if (cost > gold) { announce(root, "金币不足，无法刷新", true); return; }
+    var shop = $("[data-tactics-shop]", root);
+    var offers = $$(".ux-tactics__offer", root);
+    if (!shop || !offers.length) return;
+    root.setAttribute("data-gold", String(gold - cost));
+    shop.appendChild(offers[0]);
+    $$(".ux-tactics__offer", root).forEach(function (offer) {
+      offer.disabled = false;
+      offer.classList.remove("is-sold");
+      replay(offer, "anim-deal");
+    });
+    announce(root, "商店已刷新，消耗 " + cost + " 金币。");
+    updateTactics(root);
+  }
+
+  function buyTacticsXp(root) {
+    var cost = num(root.getAttribute("data-xp-cost"), 4);
+    var gold = num(root.getAttribute("data-gold"), 0);
+    if (cost > gold) { announce(root, "金币不足，无法购买经验", true); return; }
+    root.setAttribute("data-gold", String(gold - cost));
+    var xp = num(root.getAttribute("data-xp"), 0) + 4;
+    var next = Math.max(1, num(root.getAttribute("data-xp-next"), 8));
+    var level = num(root.getAttribute("data-level"), 1);
+    var leveled = false;
+    while (xp >= next) {
+      xp -= next;
+      level += 1;
+      next = level * 4;
+      root.setAttribute("data-level", String(level));
+      root.setAttribute("data-cap", String(Math.max(num(root.getAttribute("data-cap"), 1), level)));
+      root.setAttribute("data-xp-next", String(next));
+      leveled = true;
+    }
+    root.setAttribute("data-xp", String(xp));
+    if (leveled) {
+      var status = $(".ux-tactics__status", root);
+      replay(status, "anim-level-up");
+      floatText(status, "Lv." + level, "buff");
+    }
+    announce(root, leveled ? "升级至 Lv." + level + "，上阵人口已提升。" : "已购买 4 点经验。");
+    updateTactics(root);
+  }
+
+  function battleTactics(root) {
+    if (root._tacticsBusy) return;
+    var players = tacticsUnits(root, "board", true);
+    if (!players.length) { announce(root, "请先至少上阵一个棋子", true); return; }
+    root._tacticsBusy = true;
+    var enemies = tacticsSlots(root, "board").map(slotUnit).filter(function (unit) { return unit && unit.getAttribute("data-team") === "enemy"; });
+    players.concat(enemies).forEach(function (unit) {
+      setHp(unit, num(unit.getAttribute("data-max-hp"), 100));
+    });
+    var power = players.reduce(function (sum, unit) { return sum + num(unit.getAttribute("data-attack"), 1) * num(unit.getAttribute("data-star"), 1); }, 0);
+    var enemyPower = num(root.getAttribute("data-enemy-power"), 6);
+    var victory = power >= enemyPower;
+    players.forEach(function (unit, index) {
+      setTimeout(function () {
+        replay(unit, "anim-lunge");
+        floatText(unit, String(num(unit.getAttribute("data-attack"), 1)), "damage");
+      }, reducedMotion() ? 0 : index * 70);
+    });
+    if (enemies.length) {
+      var damage = Math.max(1, Math.ceil(power / enemies.length));
+      enemies.forEach(function (unit) { changeHp(unit, -damage); });
+    }
+    var board = $("[data-tactics-board]", root);
+    floatText(board, victory ? "胜利" : "失利", victory ? "heal" : "damage");
+    var turn = num(root.getAttribute("data-turn"), 1) + 1;
+    var income = victory ? 5 : 3;
+    root.setAttribute("data-turn", String(turn));
+    root.setAttribute("data-gold", String(num(root.getAttribute("data-gold"), 0) + income));
+    root.setAttribute("data-enemy-power", String(enemyPower + 2));
+    announce(root, (victory ? "战斗胜利" : "战斗失利") + "：战力 " + power + " vs " + enemyPower + "，获得 " + income + " 金币。");
+    updateTactics(root);
+    setTimeout(function () { root._tacticsBusy = false; }, reducedMotion() ? 30 : 750);
+  }
+
+  /* ── 事件委托与键盘支持 ─────────────────────── */
+  app.addEventListener("click", function (event) {
+    var target = event.target.closest ? event.target.closest("[data-game-act]") : null;
+    if (!target || !app.contains(target)) return;
+    var action = target.getAttribute("data-game-act");
+    var root = gameRoot(target);
+    if (!root) return;
+    emit(action, target, root);
+    switch (action) {
+      case "use-item": useItem(target, root); break;
+      case "slg-select": selectSlg(target, root); break;
+      case "slg-command": commandSlg(target, root); break;
+      case "slg-end": endSlgTurn(root); break;
+      case "card-select": selectCard(target, root); break;
+      case "card-target": selectCardTarget(target, root); break;
+      case "card-play": playCard(root); break;
+      case "card-draw": drawCard(root, false); break;
+      case "card-end": endCardTurn(root); break;
+      case "poker-select": selectPoker(target, root); break;
+      case "poker-play": playPoker(root); break;
+      case "poker-hint": hintPoker(root); break;
+      case "poker-sort": sortPoker(root); break;
+      case "poker-pass": passPoker(root); break;
+      case "tactics-slot": selectTacticsSlot(target, root); break;
+      case "tactics-buy": buyTactics(target, root); break;
+      case "tactics-refresh": refreshTactics(root); break;
+      case "tactics-xp": buyTacticsXp(root); break;
+      case "tactics-battle": battleTactics(root); break;
+    }
+  });
+
+  app.addEventListener("keydown", function (event) {
+    var target = event.target.closest ? event.target.closest('[role="button"][data-game-act]') : null;
+    if (!target || (event.key !== "Enter" && event.key !== " ")) return;
+    event.preventDefault();
+    target.click();
+  });
+
+  $$('[data-game-root="card"]', app).forEach(updateCardEnergy);
+  $$('[data-game-root="tactics"]', app).forEach(updateTactics);
+
+  window.UXGame = {
+    setHp: setHp,
+    changeHp: changeHp,
+    floatText: floatText,
+    replay: replay,
+    announce: announce,
+    refresh: function (root) {
+      if (!root) return;
+      if (root.getAttribute("data-game-root") === "card") updateCardEnergy(root);
+      if (root.getAttribute("data-game-root") === "tactics") updateTactics(root);
+    },
+    reducedMotion: reducedMotion,
+  };
 })();
 
 </script>

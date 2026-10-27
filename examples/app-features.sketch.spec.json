@@ -1,10 +1,9 @@
 {
   "meta": {
-    "title": "草图模式预览",
+    "title": "草图",
     "device": "phone",
     "note": "演示 tween 动画、状态切换、SVG 图标、红点徽标；另附草图模式同款 spec",
-    "stagger": true,
-    "renderMode": "sketch"
+    "stagger": true
   },
   "kind": "app",
   "style": "ios-clean",

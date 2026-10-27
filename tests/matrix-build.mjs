@@ -25,7 +25,7 @@ function listStyles(kind) {
 const baseSpec = (kind, style) => {
   if (kind === "game") {
     return {
-      meta: { title: "风格预览 · 游戏", device: "phone", note: `style=${style}` },
+      meta: { title: "风格预览 · 游戏", device: "phone", renderMode: "hi" },
       kind, style,
       demo: { hpDrain: true },
       screens: [
@@ -42,7 +42,7 @@ const baseSpec = (kind, style) => {
               { icon: "🎒", title: "背包", act: "toast", toast: "背包" },
               { icon: "🏆", title: "排行", act: "toast", toast: "排行" },
             ] } },
-            { type: "note", props: { text: `内置风格矩阵预览 · ${style}` } },
+            { type: "note", props: { text: style } },
           ],
         },
         {
@@ -70,7 +70,7 @@ const baseSpec = (kind, style) => {
     };
   }
   return {
-    meta: { title: "风格预览 · 应用", device: "phone", note: `style=${style}` },
+    meta: { title: "风格预览 · 应用", device: "phone", renderMode: "hi" },
     kind, style,
     screens: [
       {
@@ -86,7 +86,7 @@ const baseSpec = (kind, style) => {
             { icon: "🧾", title: "预算复核", sub: "财务 · 2h 前", to: "me" },
             { icon: "🤝", title: "拜访纪要", sub: "销售 · 昨天" },
           ] } },
-          { type: "note", props: { text: `内置风格矩阵预览 · ${style}` } },
+          { type: "note", props: { text: style } },
         ],
       },
       {
